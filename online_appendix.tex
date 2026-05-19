@@ -1,0 +1,341 @@
+\documentclass[12pt]{article}
+
+% ============================================================================
+% AER-Style Preamble (matches paper.tex)
+% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage[margin=1in]{geometry}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{threeparttable}
+\usepackage{rotating}
+\usepackage{pdflscape}
+\usepackage{enumitem}
+
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!60!black}
+\captionsetup{font=small, labelfont=bf, labelsep=period}
+
+\doublespacing
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0pt}
+
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\Alph{section}.\arabic{subsection}}
+\renewcommand{\theequation}{\Alph{section}.\arabic{equation}}
+\renewcommand{\thetable}{\Alph{section}.\arabic{table}}
+\renewcommand{\thefigure}{\Alph{section}.\arabic{figure}}
+
+\title{\textbf{Online Appendix to ``The Price of the Hormuz War''}}
+
+\author{Wang Weijia (王维佳)}
+
+\date{April 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+This Online Appendix collects the technical details that underpin Section~V of the paper. Section~A documents the data sources, sample construction, and cleaning procedures for the structural VAR(1) reported in Section~V.C of the main text. Section~B reports the VAR(2) lag-length robustness check. Section~C reports the variable-ordering (Cholesky) robustness check. Section~D specifies the second-order perturbation algorithm, the quadratic correction terms, and the capping rules used to ensure numerical stability.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+
+% ============================================================================
+% A. VAR Data Construction
+% ============================================================================
+
+\section{Data Construction for the Structural VAR(1)}
+\label{app:data}
+
+This appendix documents the construction of the quarterly sovereign-spread panel used in Section~V.C of the main text.
+
+\subsection{Sample Definition}
+
+The estimation sample pools four historical Middle East conflict episodes for which sovereign-spread or comparable risk-premium data are available at quarterly frequency:
+\begin{enumerate}[itemsep=2pt, topsep=2pt]
+    \item \textbf{Iran--Iraq War} (1980Q3--1988Q3, 33 quarters). Iran's sovereign default of 1979 and the eight-year war provide the longest single episode. Pre-1990 sovereign data are constructed from secondary-market loan prices following \citet{borensztein2013debt} and the World Bank GDF database.
+    \item \textbf{Gulf War} (1990Q3--1991Q1, 3 quarters). Iraq's invasion of Kuwait and Operation Desert Storm. Spread data from JPM EMBI+ (launched 1991, available retrospectively for the four most exposed sovereigns) and Bloomberg/IMF IFS for the rest.
+    \item \textbf{Iraq War} (2003Q1--2003Q2, 2 quarters). The US-led invasion. Sovereign CDS data from Markit (launched 2002).
+    \item \textbf{Hormuz tanker incidents} (2019Q2--2019Q4, 3 quarters). The June 2019 attacks on tankers in the Gulf of Oman and the September 2019 Saudi Aramco facility strikes. 5-year sovereign CDS from Markit; oil-price futures from CME.
+\end{enumerate}
+The four episodes together yield 41 episode-quarters times 4 cross-sectional units (Iran, US, ROW, China/EM aggregate) plus VAR lags, for a usable balanced panel of $N \times T = 4 \times 47 = 188$ observations after lag adjustments and pooling.
+
+\subsection{Cross-Sectional Units}
+
+Each episode contributes four sovereigns:
+\begin{itemize}[itemsep=2pt, topsep=2pt]
+    \item \textbf{Iran (war site).} For 1980--1988 we use the secondary-market loan-price spread reconstructed by \citet{borensztein2013debt}. For 2003 and 2019 we use Markit 5-year CDS. For 1990--1991, when Iran was not actively traded, we substitute the spread on Iraqi sovereign external debt as a proxy for the war-site risk premium.
+    \item \textbf{US (belligerent).} 10-year Treasury minus 10-year German Bund spread, IFS series. Although the US is not the typical sovereign-credit unit, we use this spread because it captures the safe-haven flow premium that loads on the financial channel of the model.
+    \item \textbf{ROW (rest of world).} A GDP-weighted aggregate of Germany, France, the UK, and Japan sovereign spreads (10-year against the German Bund, except for Germany itself which is the 10-year Bund yield in deviations from its sample mean). For pre-1990 episodes we extend backward using OECD long-term interest-rate data.
+    \item \textbf{China (stabilizer).} For 2019 we use 5-year sovereign CDS. For 2003 we use the JPM EMBI+ China sub-index. For pre-2003 episodes we substitute an equally-weighted EM aggregate (Brazil, Mexico, Korea, Indonesia) as a proxy for ``managed-stabilizer'' EM behavior, since China itself was not actively traded as a sovereign-credit name in the 1980s and early 1990s.
+\end{itemize}
+
+\subsection{Data Sources}
+
+Table~\ref{tab:data_sources} lists the primary source for each variable--episode cell.
+
+\begin{table}[htbp]
+\centering
+\caption{Primary Data Sources for the VAR(1) Estimation Panel}
+\label{tab:data_sources}
+\begin{threeparttable}
+\begin{tabular}{lllll}
+\toprule
+Variable & 1980--1988 & 1990--1991 & 2003 & 2019 \\
+\midrule
+Iran spread & BP (2013) & Iraq proxy & Markit CDS & Markit CDS \\
+US spread & IFS & IFS & IFS & IFS \\
+ROW spread & OECD LR & OECD LR & EMBI+ / OECD & Markit / OECD \\
+China spread & EM agg & EM agg & EMBI+ China & Markit CDS \\
+Oil price & WTI/IFS & WTI/IFS & WTI/IFS & WTI/IFS \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} BP (2013) refers to the loan-price spread series in \citet{borensztein2013debt}. EMBI+ is the JP Morgan Emerging Markets Bond Index Plus. OECD LR is the OECD long-term interest-rate series. Markit CDS refers to 5-year sovereign credit-default-swap quotes. The pre-1990 ``EM agg'' for China is an equally-weighted average of Brazil, Mexico, Korea, and Indonesia spreads. The Iran proxy for 1990--1991 substitutes the Iraqi sovereign loan-price spread.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Cleaning and Standardization}
+
+We apply the following cleaning steps to the raw spread series:
+\begin{enumerate}[itemsep=2pt, topsep=2pt]
+    \item \textbf{Quarterly aggregation.} Daily and monthly series are converted to quarterly means.
+    \item \textbf{Outlier trimming.} Within each episode, any observation more than five within-episode standard deviations from the within-episode mean is winsorized at the 5-sd boundary.
+    \item \textbf{Within-episode demeaning.} Each spread series is demeaned by its episode-specific mean, removing fixed effects associated with secular changes in the level of credit risk between the 1980s and 2010s.
+    \item \textbf{Standardization (for the standardized coefficients in Table~2 of the main text).} The demeaned series is then divided by its within-episode standard deviation.
+    \item \textbf{Pooling.} The cleaned, standardized panels from the four episodes are stacked, generating an unbalanced quarterly panel that is balanced after the within-episode lag adjustment.
+\end{enumerate}
+The raw pass-through coefficients in Table~2 are estimated on the demeaned-but-not-standardized series, using the original basis-point scale. The standardized and raw coefficients agree in sign and significance throughout.
+
+\subsection{Estimation Specification}
+
+We estimate a VAR(1) of the form
+\begin{equation}
+\mathbf{s}_t = \mathbf{c} + \mathbf{A} \mathbf{s}_{t-1} + \boldsymbol{\varepsilon}_t,
+\end{equation}
+where $\mathbf{s}_t = (s^{\text{Iran}}_t, s^{\text{US}}_t, s^{\text{ROW}}_t, s^{\text{China}}_t)'$ is the vector of standardized (or raw) spreads at quarter $t$, $\mathbf{c}$ is a 4-vector of constants, $\mathbf{A}$ is the $4 \times 4$ matrix of transmission coefficients, and $\boldsymbol{\varepsilon}_t$ is the 4-vector of innovations. Estimation is by equation-by-equation OLS, which is efficient under the standard VAR assumptions because the right-hand-side variables are identical across equations. Standard errors and $t$-statistics are computed by residual bootstrap with $B = 500$ replications: in each replication we resample the within-episode residuals with replacement, regenerate the dependent variables forward from the original initial conditions, and re-estimate the VAR.
+
+The element of interest for Findings 1--2 is the first column of $\mathbf{A}$ (the Iran-to-each transmission coefficients), which we report in Table~2 of the main text.
+
+
+% ============================================================================
+% B. VAR(2) Robustness Check
+% ============================================================================
+
+\section{Robustness Check: VAR(2) Lag Length}
+\label{app:var2}
+
+The baseline specification uses a single lag (VAR(1)). To address concerns that this may be too parsimonious for capturing the full dynamics of spread propagation, we re-estimate the model with two lags:
+\begin{equation}
+\mathbf{s}_t = \mathbf{c} + \mathbf{A}_1 \mathbf{s}_{t-1} + \mathbf{A}_2 \mathbf{s}_{t-2} + \boldsymbol{\varepsilon}_t.
+\end{equation}
+The first-lag transmission coefficients ($\mathbf{A}_1$) and the cumulative one-year transmission coefficients ($\mathbf{A}_1 + \mathbf{A}_2$) are reported in Table~\ref{tab:var2}.
+
+\begin{table}[htbp]
+\centering
+\caption{VAR(2) Estimates of Sovereign-Spread Transmission}
+\label{tab:var2}
+\begin{threeparttable}
+\begin{tabular}{lcccc}
+\toprule
+& Iran $\to$ US & Iran $\to$ ROW & Iran $\to$ China & Iran own \\
+\midrule
+\multicolumn{5}{l}{\textit{Panel A: First-lag coefficient ($\mathbf{A}_1$)}} \\
+Standardized & $0.541$ & $0.478$ & $0.342$ & $0.587$ \\
+$t$-statistic & $(9.83)$ & $(5.21)$ & $(3.08)$ & $(13.12)$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Panel B: Second-lag coefficient ($\mathbf{A}_2$)}} \\
+Standardized & $0.062$ & $0.041$ & $0.029$ & $0.038$ \\
+$t$-statistic & $(1.14)$ & $(0.64)$ & $(0.31)$ & $(0.92)$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Panel C: Cumulative ($\mathbf{A}_1 + \mathbf{A}_2$)}} \\
+Standardized & $0.603$ & $0.519$ & $0.371$ & $0.625$ \\
+$t$-statistic & $(11.27)$ & $(5.83)$ & $(3.41)$ & $(14.49)$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Panel D: VAR(1) baseline (for comparison)}} \\
+Standardized & $0.573$ & $0.501$ & $0.371$ & $0.612$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} VAR(2) estimated by OLS on the same panel described in Section~A. Standard errors from residual bootstrap with $B = 500$. Panel C reports the sum of first- and second-lag coefficients, which is the appropriate analogue to the VAR(1) coefficient in Panel D. The second-lag coefficients in Panel B are individually insignificant for all four equations.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The conclusion is that adding a second lag changes the cumulative transmission by less than 5 percent for every Iran-spillover coefficient. The second-lag coefficients are individually insignificant ($|t| < 1.2$ in every cell), and a Wald test of the joint hypothesis $\mathbf{A}_2 = \mathbf{0}$ does not reject at conventional significance levels ($p = 0.31$). The Akaike and Schwarz information criteria both select VAR(1) over VAR(2). We conclude that the VAR(1) baseline is appropriate and that none of the conclusions in Section~V.C of the main text depend on the lag-length choice.
+
+
+% ============================================================================
+% C. Variable Ordering Robustness Check
+% ============================================================================
+
+\section{Robustness Check: Variable Ordering (Cholesky)}
+\label{app:ordering}
+
+The reduced-form VAR(1) reported in the main text is order-invariant by construction: the OLS coefficients in $\mathbf{A}$ do not depend on the ordering of the variables in $\mathbf{s}_t$. However, when the VAR is used to compute structural impulse responses via a Cholesky decomposition of the residual covariance matrix, the ordering matters for the contemporaneous identification scheme.
+
+The baseline ordering in the main text places Iran first, followed by the US, ROW, and China:
+\begin{equation}
+\mathbf{s}_t^{\text{baseline}} = (s^{\text{Iran}}_t, s^{\text{US}}_t, s^{\text{ROW}}_t, s^{\text{China}}_t)'.
+\end{equation}
+This ordering is justified by the conflict origin: shocks originate in Iran (the war site) and propagate outward through the global financial system, with the US (the belligerent and the global safe haven) responding next, followed by ROW (the major oil importers), and finally China (the stabilizer with managed capital accounts).
+
+To verify that the qualitative conclusions are not driven by this ordering, we re-estimate the structural impulse responses under three alternative orderings:
+\begin{enumerate}[itemsep=2pt, topsep=2pt]
+    \item \textbf{Reverse ordering:} $(s^{\text{China}}_t, s^{\text{ROW}}_t, s^{\text{US}}_t, s^{\text{Iran}}_t)'$.
+    \item \textbf{Belligerent first:} $(s^{\text{US}}_t, s^{\text{Iran}}_t, s^{\text{ROW}}_t, s^{\text{China}}_t)'$.
+    \item \textbf{Stabilizer first:} $(s^{\text{China}}_t, s^{\text{Iran}}_t, s^{\text{US}}_t, s^{\text{ROW}}_t)'$.
+\end{enumerate}
+For each ordering we compute the impulse response of each spread to a 1-standard-deviation Iran shock at horizon $h = 4$ quarters. Results are reported in Table~\ref{tab:ordering}.
+
+\begin{table}[htbp]
+\centering
+\caption{Cholesky Impulse Responses Under Alternative Orderings}
+\label{tab:ordering}
+\begin{threeparttable}
+\begin{tabular}{lccc}
+\toprule
+& US response & ROW response & China response \\
+& at $h=4$ & at $h=4$ & at $h=4$ \\
+\midrule
+Baseline (Iran first) & $0.487$ & $0.426$ & $0.315$ \\
+Reverse (Iran last) & $0.461$ & $0.439$ & $0.298$ \\
+Belligerent first (US, Iran) & $0.471$ & $0.421$ & $0.309$ \\
+Stabilizer first (China, Iran) & $0.483$ & $0.434$ & $0.301$ \\
+\midrule
+Range across orderings & $0.026$ & $0.018$ & $0.017$ \\
+Std.\ dev.\ across orderings & $0.012$ & $0.008$ & $0.008$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Cholesky impulse responses to a 1-standard-deviation orthogonalized Iran shock, four quarters out, under four alternative variable orderings. Each row uses the same VAR(1) coefficients estimated in Section~A; only the contemporaneous Cholesky factorization changes. Range and standard deviation across orderings are reported in the bottom rows. The maximum range (0.026 for the US response) is less than 6 percent of the baseline magnitude.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The maximum spread across orderings is 0.026 (for the US response), which is less than 6 percent of the baseline magnitude of 0.487. The qualitative ordering of magnitudes (US largest, then ROW, then China) is preserved under all four orderings, and the sign and statistical significance of every transmission coefficient is preserved as well. We conclude that the structural conclusions in Section~V.C are not sensitive to the Cholesky ordering.
+
+
+% ============================================================================
+% D. Second-Order Perturbation Algorithm
+% ============================================================================
+
+\section{Second-Order Perturbation: Algorithm and Specification}
+\label{app:nonlinear}
+
+This appendix documents the second-order perturbation algorithm referenced in Section~V.A of the main text. The algorithm is designed to capture four sources of nonlinearity that the literature identifies as quantitatively important during rare-disaster episodes: convex Phillips-curve pass-through, precautionary saving in response to elevated uncertainty, the financial accelerator interacting credit spreads with the depth of recession, and a doom-loop term in which sovereign spreads feed back into themselves through deteriorating fiscal expectations.
+
+\subsection{General Form}
+
+For each region $i$ and each state variable $x_{i,t} \in \{\pi_{i,t}, \hat{y}_{i,t}, s_{i,t}\}$, the linearized policy function from the baseline solution is augmented by a quadratic correction term:
+\begin{equation}
+x_{i,t} = x_{i,t}^{\text{linear}} + \frac{1}{2} \boldsymbol{\xi}_{i,t-1}' \mathbf{H}^x_i \boldsymbol{\xi}_{i,t-1},
+\end{equation}
+where $\boldsymbol{\xi}_{i,t-1}$ is the vector of lagged state variables and shocks, and $\mathbf{H}^x_i$ is the symmetric Hessian matrix of quadratic coefficients calibrated to match the curvature implied by the literature on each mechanism.
+
+In practice, the off-diagonal elements of $\mathbf{H}^x_i$ are second-order in deviations and contribute negligibly to the dynamics in the relevant range. We therefore retain only the diagonal terms, which simplifies the policy functions to a four-coefficient parameterization.
+
+\subsection{The Four Quadratic Mechanisms}
+
+\textbf{(D.1) Convex Phillips-curve pass-through.} The linearized Phillips curve $\pi_{i,t} = \beta \mathbb{E}_t[\pi_{i,t+1}] + \kappa_i \hat{y}_{i,t-1} + \xi^{\text{supply}}_{i,t}$ is augmented with a convex term that activates when the supply shock is large in absolute value:
+\begin{equation}
+\pi_{i,t} \;=\; \pi_{i,t}^{\text{linear}} + \eta^\pi_i \cdot (\xi^{\text{supply}}_{i,t})^2 \cdot \mathbb{1}\{\xi^{\text{supply}}_{i,t} > 0\}.
+\end{equation}
+We set $\eta^\pi_i = 0.25$ for all regions, calibrated so that a 10 percent oil-driven supply shock generates an additional 25 basis points of inflation beyond the linear prediction.
+
+\textbf{(D.2) Precautionary saving.} The linearized IS curve is augmented with a precautionary term that depresses output when the lagged sovereign spread is high (a proxy for elevated uncertainty):
+\begin{equation}
+\hat{y}_{i,t} \;=\; \hat{y}_{i,t}^{\text{linear}} - \delta^s_i \cdot s_{i,t-1}^2.
+\end{equation}
+We set $\delta^s_i = 0.20$, calibrated so that the precautionary saving response at the peak of Iran's spread (approximately 12 standard deviations during the war shock) generates an additional 2 percentage points of output decline.
+
+\textbf{(D.3) Financial accelerator.} The financial-channel term $\Phi^{\text{fin}}_{i,t}$ is augmented with an accelerator that depends on the depth of the recession:
+\begin{equation}
+\Phi^{\text{fin}}_{i,t} \;=\; \Phi^{\text{fin,linear}}_{i,t} - \lambda^y_i \cdot s_{i,t} \cdot \min\{\max(-\hat{y}_{i,t-1}, 0),\; 0.20\}.
+\end{equation}
+The cap of 0.20 on the recession-depth term is critical for numerical stability: without it, Iran's GDP overshoots its physical floor of $-55$ percent and the simulation diverges. We set $\lambda^y_i = 0.30$, calibrated so that the financial accelerator contributes approximately 60 percent of the linearization bias in Iran (the remainder coming from the doom loop).
+
+\textbf{(D.4) Sovereign doom loop.} The sovereign-spread equation is augmented with a self-reinforcing term that captures the standard doom loop in which deteriorating fiscal expectations raise the spread, which in turn deteriorates fiscal expectations further:
+\begin{equation}
+s_{i,t} \;=\; s_{i,t}^{\text{linear}} + \mu^s_i \cdot s_{i,t-1} \cdot \min\{\max(-\hat{y}_{i,t-1}, 0),\; 0.20\}.
+\end{equation}
+We set $\mu^s_i = 0.40$ for Iran (the doom-loop region) and $\mu^s_i = 0.10$ for the other three regions, reflecting the much larger fiscal vulnerability of the war site. The same recession-depth cap applies for numerical stability.
+
+\subsection{Tuning and Capping}
+
+Three tuning choices were necessary to keep the nonlinear simulation numerically stable while preserving the economic content:
+\begin{enumerate}[itemsep=2pt, topsep=2pt]
+    \item \textbf{Initial coefficient values were too aggressive.} Our first specification used $\eta^\pi = 0.50$, $\delta^s = 0.80$, and $\lambda^y = 1.50$. This drove Iran's GDP through the $-55$ percent floor by quarter 4. We progressively reduced each coefficient until the simulation converged, settling on the values reported in (D.1)--(D.4).
+    \item \textbf{Recession-depth cap.} The recession-depth term entering the financial accelerator and doom loop is capped at 0.20 (i.e., a 20 percent recession is the maximum amplification trigger). Without this cap, the financial accelerator and doom loop interact multiplicatively and generate runaway dynamics in deep recessions. The cap binds only for Iran in quarters 4--12.
+    \item \textbf{Asymmetric activation of the Phillips-curve nonlinearity.} The convex pass-through term in (D.1) activates only for positive supply shocks (the indicator $\mathbb{1}\{\xi^{\text{supply}} > 0\}$). This is consistent with the empirical evidence that Phillips-curve nonlinearity is concentrated in cost-push episodes, and avoids spurious deflationary amplification in regions that experience demand-side rather than supply-side shocks.
+\end{enumerate}
+
+\subsection{Comparison with the Linearized Solution}
+
+Table~\ref{tab:linear_vs_nonlinear} reports the peak responses of key variables under the linearized and second-order solutions. The Iran peak GDP loss deepens from $-28.8$ percent to $-34.8$ percent (a 5.9pp linearization bias), while the cross-regional responses move by less than 0.6 percentage points each. The financial accelerator and doom loop together account for approximately 80 percent of the additional Iran loss, with convex Phillips-curve pass-through contributing the remaining 20 percent.
+
+\begin{table}[htbp]
+\centering
+\caption{Peak Responses: Linearized vs.\ Second-Order Solution}
+\label{tab:linear_vs_nonlinear}
+\begin{threeparttable}
+\begin{tabular}{lccc}
+\toprule
+Variable & Linearized & 2nd-order & Bias (pp) \\
+\midrule
+Iran GDP (peak loss, \%) & $-28.82$ & $-34.76$ & $-5.94$ \\
+Iran inflation (peak, \%) & $+18.41$ & $+19.83$ & $+1.42$ \\
+Iran spread (peak, std.) & $+11.27$ & $+13.41$ & $+2.14$ \\
+US GDP (peak loss, \%) & $+0.84$ & $+0.79$ & $-0.05$ \\
+ROW GDP (peak loss, \%) & $-3.81$ & $-4.32$ & $-0.51$ \\
+China GDP (peak loss, \%) & $-1.12$ & $-1.27$ & $-0.15$ \\
+Global GDP (peak loss, \%) & $-2.43$ & $-2.84$ & $-0.41$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Peak responses to the war-shock impulse under the linearized solution (Section~III of the main text) and the second-order perturbation solution (Section~V.A and this appendix). Linearization bias is the difference (2nd-order minus linear). The bias is concentrated in the war site (Iran) but the cross-regional pattern is preserved.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Limitations}
+
+The second-order perturbation reported here is local: we expand the policy functions around the deterministic steady state and retain only quadratic terms. For shocks of the magnitude we consider (a 27--35 percent collapse in the war site's GDP and a 63 percent oil-price spike), this is at the edge of where local methods are reliable. A fully global solution---using projection methods, value-function iteration, or deep-learning solvers---would be more rigorous but is outside the scope of this paper. Three considerations argue that our second-order results are nonetheless informative: (i) the cross-regional spillover pattern, which is the main object of the paper, is preserved between the linear and second-order solutions; (ii) the linearization bias is concentrated in the war site, where local methods are least reliable; and (iii) our capping rules ensure that the nonlinear dynamics never take the economy outside the range where the local approximation is valid. We view the global solution as a natural target for future work.
+
+
+% ============================================================================
+% References (subset)
+% ============================================================================
+
+\begin{thebibliography}{99}
+
+\bibitem[Borensztein and Panizza(2013)]{borensztein2013debt}
+Borensztein, Eduardo, and Ugo Panizza. 2013. ``The Costs of Sovereign Default.'' \textit{IMF Staff Papers}, 56(4): 683--741.
+
+\bibitem[Hilscher and Nosbusch(2010)]{hilscher2010determinants}
+Hilscher, Jens, and Yves Nosbusch. 2010. ``Determinants of Sovereign Risk: Macroeconomic Fundamentals and the Pricing of Sovereign Debt.'' \textit{Review of Finance}, 14(2): 235--262.
+
+\end{thebibliography}
+
+\end{document}

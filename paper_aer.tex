@@ -1,0 +1,718 @@
+\documentclass[12pt,a4paper]{article}
+
+% ============================================================================
+% AER-Style Preamble
+% ============================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{mathptmx}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,
+            citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{threeparttable}
+\usepackage{rotating}
+\usepackage{pdflscape}
+\usepackage{enumitem}
+\usepackage{footmisc}
+\usepackage{appendix}
+\usepackage{indentfirst}
+\usepackage{titlesec}
+
+\captionsetup{font=small, labelfont=bf, labelsep=period}
+\doublespacing
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0pt}
+\AtBeginDocument{\thispagestyle{empty}}
+
+% AER section numbering: Roman for sections, italic letters for subsections
+\titleformat{\section}{\normalsize\bfseries\centering}{\Roman{section}.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\itshape\centering}{\Alph{subsection}.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{}{0em}{}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+
+% ============================================================================
+\begin{document}
+
+% AER title block
+\begin{center}
+{\large\bfseries The Price of the Hormuz War: A DSGE Analysis of the\\[0.4em]
+US--Iran Conflict and China's Role as Global Economic Stabilizer\par}
+\vspace{0.9em}
+{\normalsize \textit{By} \textsc{Wang Weijia}%
+\footnote{School of Economics and Finance, Xi'an Jiaotong University,
+Xi'an, Shaanxi 710000, China (email: \texttt{wangweijia@stu.xjtu.edu.cn}).
+Wang Weijia (born August 1993, Baoding, Hebei) is a PhD candidate with
+research interests in international trade.
+This paper builds on the empirical framework of \citet{federle2026price}.
+All errors are our own.}\par}
+\end{center}
+\vspace{0.9em}
+
+% AER abstract: italicised quote, JEL inside at end
+\begin{quote}
+\itshape
+We develop a four-region New Keynesian DSGE model to analyze the
+macroeconomic consequences of a hypothetical US--Israel military conflict
+with Iran featuring a blockade of the Strait of Hormuz. The model integrates
+real channels---trade disruption and energy supply shocks---with financial
+channels including sovereign risk premia, capital flows, and equity market
+contagion. Under our baseline calibration (70 percent blockade severity),
+Iran suffers a 27.2 percent peak GDP decline, global oil prices surge
+63 percent, and financial contagion amplifies third-country output losses
+from 1.1 to 3.8 percent. We quantify China's stabilization role through
+three mechanisms: strategic petroleum reserve releases, renewable energy
+substitution, and manufacturing export expansion. These interventions
+reduce cumulative global GDP losses by approximately \$2.2 trillion.
+Our results extend \citet{federle2026price} by embedding their
+trade-exposure spillover channel in a structural framework that permits
+counterfactual policy analysis, yielding new insights into the role of
+large emerging economies as global economic stabilizers during
+geopolitical crises.
+(\textit{JEL} E32, F41, F51, H56, Q43)
+\end{quote}
+
+\newpage
+\setcounter{page}{1}
+
+% ============================================================================
+% I. INTRODUCTION
+% ============================================================================
+
+\section{Introduction}
+
+The economic consequences of interstate conflict have long occupied a central place in macroeconomics, yet structural models capable of quantifying the full general-equilibrium effects of modern warfare remain scarce. \citet{federle2026price} provide the most comprehensive empirical assessment to date, documenting that wars reduce GDP in the war site by approximately 10 percent and generate significant negative spillovers to third countries through bilateral trade linkages. Their reduced-form local projection estimates, however, cannot speak to counterfactual policy interventions or disentangle the multiple channels through which a specific conflict scenario would propagate through the global economy.
+
+This paper fills that gap. We construct a four-region New Keynesian DSGE model calibrated to a concrete, policy-relevant scenario: a US--Israel military strike on Iran followed by an Iranian blockade of the Strait of Hormuz. The Hormuz Strait handles approximately 20 percent of global oil trade \citep{eia2023hormuz}, making its disruption a uniquely potent transmission mechanism that extends far beyond the bilateral trade channels emphasized in the existing literature.
+
+Our model makes three contributions. First, we embed the trade-exposure spillover mechanism documented by \citet{federle2026price} within a structural DSGE framework that permits explicit counterfactual analysis. The model features four regions---Iran (war site), the US--Israel bloc (belligerent), China (stabilizer), and the rest of the world (ROW)---each governed by a New Keynesian Phillips curve, an IS curve, and a Taylor rule, linked through a global oil market and bilateral trade flows.
+
+Second, we extend the real-side analysis with financial channels that prove quantitatively important. Sovereign risk premia, capital flows governed by an uncovered interest parity condition, equity market valuations, and a financial contagion matrix all interact with the real economy. The inclusion of financial channels amplifies ROW output losses from 1.1 percent (trade channel only) to 3.8 percent (trade plus financial channels), consistent with the empirical evidence on financial transmission of geopolitical shocks \citep{caldara2022measuring}.
+
+Third, we introduce and quantify a novel mechanism: the stabilization role of a large emerging economy during a global crisis. China's triple stabilization---strategic petroleum reserve (SPR) releases, accelerated renewable energy substitution, and manufacturing export expansion to fill disrupted supply chains---reduces cumulative global GDP losses by approximately \$2.2 trillion and lowers peak global inflation by 0.29 percentage points. This finding speaks to an underexplored dimension of the ``China shock'' literature: rather than disrupting advanced-economy labor markets \citep{autor2013china}, China may serve as a global economic ballast during geopolitical crises.
+
+Our baseline results indicate that under a 70 percent Hormuz blockade, Iran experiences a peak GDP decline of 27.2 percent---substantially larger than the average war-site effect in \citet{federle2026price}, reflecting Iran's extreme dependence on oil export revenue. The US--Israel bloc experiences a modest GDP increase of 1.7 percent driven by military Keynesian stimulus, though consumption welfare declines. Global oil prices surge by 63 percent at peak, and the financial contagion channel generates sovereign spread increases of 1,403 basis points for Iran, with meaningful spillovers to emerging market spreads worldwide.
+
+The remainder of this paper is organized as follows. Section~\ref{sec:literature} reviews related literature. Section~\ref{sec:model} presents the DSGE model. Section~\ref{sec:calibration} discusses calibration. Section~\ref{sec:results} reports the main results, including sensitivity analysis and welfare calculations. Section~\ref{sec:conclusion} concludes with policy implications.
+
+
+% ============================================================================
+% II. LITERATURE REVIEW
+% ============================================================================
+
+\section{Related Literature}
+\label{sec:literature}
+
+This paper relates to several strands of the literature.
+
+\textit{The economics of war and conflict.} A large literature studies the macroeconomic effects of armed conflict. Early contributions focused on the war site: \citet{abadie2003economic} use synthetic control methods to estimate the cost of the Basque conflict, while \citet{barro2006rare} models wars as rare disasters affecting asset prices. More recently, \citet{federle2026price} provide a comprehensive cross-country panel analysis using local projections \citep{jorda2005estimation} to estimate the dynamic effects of wars on GDP, inflation, and trade. They identify wars through a narrative approach, distinguishing war sites from belligerents and third countries, and document that bilateral trade exposure is the primary channel through which war-related GDP losses propagate internationally. Our model takes their empirical findings as a calibration target and embeds them in a structural framework that permits counterfactual policy analysis.
+
+\textit{DSGE models of geopolitical risk.} The application of DSGE models to conflict scenarios is relatively recent. \citet{caldara2022measuring} construct a geopolitical risk index and study its macroeconomic effects, finding significant impacts on investment and output. \citet{bodenstein2011oil} develop a two-country DSGE model with oil trade to study the transmission of oil supply shocks, providing a methodological foundation for our multi-region energy channel. Our contribution extends this literature by integrating military shocks, trade disruption, energy supply shocks, and financial contagion within a single unified framework calibrated to a specific conflict scenario.
+
+\textit{Oil shocks and the macroeconomy.} The macroeconomic effects of oil price shocks have been extensively studied since \citet{hamilton1983oil}. \citet{blanchard2007macroeconomic} analyze why recent oil shocks have had smaller macroeconomic effects than those in the 1970s, attributing the change to improved monetary policy and reduced energy intensity. \citet{kilian2009not} emphasizes the distinction between supply-driven and demand-driven oil price changes. Our model features an explicit global oil market where the Hormuz blockade creates a supply-side shock with endogenous price determination, SPR policy responses, and heterogeneous regional exposure.
+
+\textit{Financial contagion and sovereign risk.} The financial channels in our model build on the literature on sovereign risk premia and capital flow dynamics. \citet{longstaff2011financial} study contagion in sovereign credit default swap markets, while \citet{rey2015dilemma} documents the global financial cycle driven by US monetary policy and risk appetite. Our financial contagion matrix captures the cross-regional transmission of sovereign spreads, with amplification through a global risk aversion factor that responds to capital flight from the conflict zone.
+
+\textit{China's role in the global economy.} The literature on China's global economic impact has largely focused on the ``China shock'' in trade \citep{autor2013china} and China's role in global imbalances \citep{bernanke2005global}. More recent work examines China's strategic petroleum reserves \citep{zhang2020china} and industrial policy in renewable energy \citep{helveston2019china}. We contribute a novel perspective by modeling China not as a source of disruption but as a potential stabilizer during global crises---a role enabled by its large SPR, expanding renewable capacity, and diversified manufacturing base.
+
+
+% ============================================================================
+% III. MODEL
+% ============================================================================
+
+\section{The Model}
+\label{sec:model}
+
+We develop a four-region New Keynesian DSGE model in which regions are linked through a global oil market, bilateral trade, and financial flows. Each region $i \in \{\text{Iran}, \text{US-Israel}, \text{China}, \text{ROW}\}$ is characterized by a representative household, a continuum of monopolistically competitive firms, and a central bank.
+
+\subsection{Regional Equilibrium}
+
+Each region solves a standard New Keynesian three-equation system, augmented with energy, trade, and financial channels.
+
+\subsubsection{New Keynesian Phillips Curve}
+
+The supply side of each region is governed by:
+\begin{equation}
+\pi_{i,t} = \beta \, \mathbb{E}_t[\pi_{i,t+1}] + \kappa_i \, \hat{y}_{i,t-1} + \xi^{\text{supply}}_{i,t}
+\label{eq:nkpc}
+\end{equation}
+where $\pi_{i,t}$ is inflation, $\hat{y}_{i,t}$ is the output gap, $\beta$ is the discount factor, and $\kappa_i$ is the region-specific slope of the Phillips curve:
+\begin{equation}
+\kappa_i = \frac{(1-\theta_i)(1-\beta\theta_i)}{\theta_i} \cdot \frac{\sigma_i + \phi_i}{1 + \epsilon_i \phi_i}
+\label{eq:kappa}
+\end{equation}
+with $\theta_i$ the Calvo price stickiness parameter, $\sigma_i$ the coefficient of relative risk aversion, $\phi_i$ the Frisch elasticity inverse, and $\epsilon_i$ the elasticity of substitution across varieties. The supply shock $\xi^{\text{supply}}_{i,t}$ combines energy cost pass-through and physical destruction:
+\begin{equation}
+\xi^{\text{supply}}_{i,t} = \alpha_{e,i} \cdot \max(\Delta p^{\text{oil}}_t, 0) \cdot 0.6 + \delta^{\text{destroy}}_{i,t} \cdot 0.8 - \chi^{\text{mfg}}_t \cdot \omega_i \cdot 0.2
+\label{eq:supply_shock}
+\end{equation}
+where $\alpha_{e,i}$ is the energy share in production, $\delta^{\text{destroy}}_{i,t}$ is physical capital destruction (nonzero only for Iran), and $\chi^{\text{mfg}}_t$ is China's manufacturing substitution effect with $\omega_i$ measuring trade openness.
+
+\subsubsection{IS Curve with Financial Conditions}
+
+The demand side features an IS curve augmented with military spending, trade disruption, energy costs, and financial conditions:
+\begin{equation}
+\hat{y}_{i,t} = \rho \, \hat{y}_{i,t-1} - \frac{1}{\sigma_i}(i_{i,t} - \mathbb{E}_t[\pi_{i,t+1}]) + \phi^{\text{mil}} g^{\text{mil}}_{i,t} - \alpha_{e,i} \cdot \max(\Delta p^{\text{oil}}_t, 0) \cdot 0.3 - \tau^{\text{trade}}_{i,t} + \Phi^{\text{fin}}_{i,t}
+\label{eq:is}
+\end{equation}
+where $\rho = 0.75$ captures output persistence, $g^{\text{mil}}_{i,t}$ is the military spending impulse (with multiplier $\phi^{\text{mil}} = 0.8$), $\tau^{\text{trade}}_{i,t}$ captures trade disruption effects, and $\Phi^{\text{fin}}_{i,t}$ is the financial conditions index:
+\begin{equation}
+\Phi^{\text{fin}}_{i,t} = -\gamma_s \cdot s_{i,t} - \gamma_k \cdot \max(-k_{i,t}, 0)
+\label{eq:fci}
+\end{equation}
+with $\gamma_s = 0.15$ and $\gamma_k = 0.10$ governing the sensitivity of output to sovereign spreads $s_{i,t}$ and capital outflows $k_{i,t}$, respectively.
+
+\subsubsection{Taylor Rule}
+
+Monetary policy follows a standard Taylor rule with interest rate smoothing:
+\begin{equation}
+i_{i,t} = \rho_{i,i} \, i_{i,t-1} + (1 - \rho_{i,i})(\phi_{\pi,i} \, \pi_{i,t} + \phi_{y,i} \, \hat{y}_{i,t-1})
+\label{eq:taylor}
+\end{equation}
+where $\rho_{i,i}$ is the smoothing parameter, $\phi_{\pi,i}$ is the inflation response coefficient, and $\phi_{y,i}$ is the output gap response coefficient.
+
+
+\subsection{Global Oil Market}
+
+The Strait of Hormuz handles approximately 20 percent of global petroleum trade. An Iranian blockade disrupts transit for all producers routing through the strait, including Saudi Arabia (12 percent of global supply), the UAE (4 percent), Iraq (5 percent), and Iran itself (4 percent).
+
+The global oil supply shock at time $t$ is:
+\begin{equation}
+\Delta S_t = \underbrace{\lambda^{\text{block}}_t \cdot (s^{\text{Hormuz}} - s^{\text{Iran}})}_{\text{Transit disruption}} + \underbrace{s^{\text{Iran}} \cdot \lambda^{\text{prod}}}_{\text{Iran production loss}} - \underbrace{0.3 \cdot \lambda^{\text{block}}_t \cdot (s^{\text{Hormuz}} - s^{\text{Iran}})}_{\text{Pipeline rerouting offset}}
+\label{eq:oil_supply}
+\end{equation}
+where $s^{\text{Hormuz}} = 0.20$ is Hormuz's share of global supply, $s^{\text{Iran}} = 0.04$ is Iran's production share, $\lambda^{\text{block}}_t$ is blockade severity (decaying over time), and $\lambda^{\text{prod}} = 0.80$ is the fraction of Iranian production destroyed.
+
+Oil prices are determined by supply-demand balance with low short-run elasticities:
+\begin{equation}
+\frac{\Delta P^{\text{oil}}_t}{P^{\text{oil}}} = \frac{\Delta S_t - \text{SPR}_t + \Delta D_t}{|\varepsilon_d| + \varepsilon_s}
+\label{eq:oil_price}
+\end{equation}
+where $\varepsilon_d = -0.05$ and $\varepsilon_s = 0.10$ are short-run demand and supply elasticities \citep{hamilton2009understanding}, $\text{SPR}_t$ is aggregate strategic reserve releases, and $\Delta D_t$ captures demand destruction from the recession.
+
+\subsection{Financial Channels}
+
+We augment the model with three financial variables per region, capturing channels that proved quantitatively important in the 2022 Russia--Ukraine crisis.
+
+\subsubsection{Sovereign Risk Premium}
+
+The sovereign spread follows:
+\begin{equation}
+s_{i,t} = \underbrace{s^{\text{shock}}_{i,t}}_{\text{Exogenous}} + \underbrace{0.3 \cdot \max(-\hat{y}_{i,t-1}, 0)}_{\text{Countercyclical}} + \underbrace{0.2 \cdot s_{i,t-1}}_{\text{Persistence}}
+\label{eq:spread}
+\end{equation}
+where $s^{\text{shock}}_{i,t}$ is the region-specific exogenous risk premium shock. For Iran, this takes the form $s^{\text{shock}}_{\text{Iran},t} = 0.05 \cdot e^{-0.08t}$, reflecting a 500 basis point initial jump with gradual decay.
+
+\subsubsection{Capital Flows}
+
+Net capital inflows are determined by an augmented uncovered interest parity (UIP) condition:
+\begin{equation}
+k_{i,t} = k^{\text{shock}}_{i,t} - 2.0 \cdot s_{i,t} + 0.5 \cdot (i_{i,t} - \bar{r}) + 0.3 \cdot k_{i,t-1}
+\label{eq:capital}
+\end{equation}
+where the spread coefficient of $-2.0$ captures the strong negative effect of sovereign risk on capital inflows, and $\bar{r} = 0.02$ is the global risk-free rate. This specification generates capital flight from Iran and safe-haven flows into the US, consistent with typical crisis dynamics.
+
+\subsubsection{Equity Markets}
+
+Equity valuations follow a simplified Gordon growth model:
+\begin{equation}
+q_{i,t} = 0.6 \cdot q_{i,t-1} + 10 \cdot g^e_{i,t} - 8 \cdot (i_{i,t} + s_{i,t}) - 3 \cdot \max(-\hat{y}_{i,t}, 0) + q^{\text{shock}}_{i,t}
+\label{eq:equity}
+\end{equation}
+where $g^e_{i,t} = 0.02 + 0.5 \cdot \hat{y}_{i,t}$ is expected earnings growth and the discount rate is the sum of the policy rate and sovereign spread.
+
+\subsubsection{Real Exchange Rate}
+
+The real exchange rate responds to spreads, capital flows, and policy intervention:
+\begin{equation}
+e_{i,t} = 0.4 \cdot e_{i,t-1} + 0.5 \cdot s_{i,t} - 0.3 \cdot k_{i,t} + \iota^{\text{fx}}_{i,t}
+\label{eq:rer}
+\end{equation}
+where $\iota^{\text{fx}}_{i,t}$ captures foreign exchange intervention (nonzero only for China in the stabilization scenario).
+
+\subsubsection{Financial Contagion}
+
+Sovereign spreads transmit across regions through a financial linkage matrix $\mathbf{L}$:
+\begin{equation}
+\tilde{s}^{\text{shock}}_{j,t} = s^{\text{shock}}_{j,t} + 0.1 \cdot \left(\sum_{i \neq j} L_{ij} \cdot s_{i,t-1}\right) \cdot \Gamma_t
+\label{eq:contagion}
+\end{equation}
+where $L_{ij}$ measures financial linkage from region $i$ to region $j$, and $\Gamma_t = 1 + 2 \cdot \max(-k_{\text{Iran},t}, 0)$ is a global risk aversion amplifier that increases during periods of Iranian capital flight. The linkage matrix is calibrated to reflect the empirical pattern of financial contagion, with Iran having limited direct linkages but generating amplified indirect effects through the global risk channel.
+
+
+\subsection{China's Triple Stabilization Mechanism}
+
+China's stabilization operates through three distinct channels, each with different temporal profiles.
+
+\textit{Strategic Petroleum Reserve Release.} China releases SPR stocks at rate:
+\begin{equation}
+\text{SPR}^{\text{China}}_t = \begin{cases} 0.008 \cdot e^{-0.1t} + 0.002(1-e^{-0.15t}) & t < 8 \\ 0.002 \cdot e^{-0.2(t-8)} + 0.002(1-e^{-0.15t}) & t \geq 8 \end{cases}
+\label{eq:spr}
+\end{equation}
+where the first term represents direct SPR drawdown and the second captures renewable energy substitution that progressively displaces oil demand. China's SPR capacity parameter is calibrated at 0.8, reflecting approximately 90 days of import cover.
+
+\textit{Renewable Energy Substitution.} The renewable offset $\Delta^{\text{ren}}_t = 0.002(1-e^{-0.15t})$ grows over time as China accelerates deployment of solar, wind, and electric vehicle adoption in response to elevated oil prices, gradually reducing aggregate oil demand.
+
+\textit{Manufacturing Export Expansion.} China expands manufacturing output to fill global supply gaps:
+\begin{equation}
+\chi^{\text{mfg}}_t = 0.015 \cdot (1 - e^{-0.2t})
+\label{eq:mfg}
+\end{equation}
+This channel operates through the supply shock term in the Phillips curve of trading partners, reducing imported inflation by providing substitute goods for disrupted supply chains.
+
+
+% ============================================================================
+% IV. CALIBRATION
+% ============================================================================
+
+\section{Calibration}
+\label{sec:calibration}
+
+\subsection{Regional Parameters}
+
+Table~\ref{tab:calibration} reports the calibration of structural parameters for each region. Standard New Keynesian parameters ($\beta$, $\sigma$, $\phi$, $\alpha$, $\theta$, $\epsilon$) are drawn from the literature, with region-specific adjustments reflecting institutional differences.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Structural Parameter Calibration}
+\label{tab:calibration}
+\begin{tabular}{@{}lccccl@{}}
+\toprule
+Parameter & Iran & US-Israel & China & ROW & Source \\
+\midrule
+\multicolumn{6}{l}{\textit{Preferences and technology}} \\
+$\beta$ (discount factor) & 0.99 & 0.99 & 0.99 & 0.99 & Standard \\
+$\sigma$ (risk aversion) & 2.0 & 1.5 & 1.2 & 1.5 & Regional estimates \\
+$\theta$ (Calvo parameter) & 0.60 & 0.75 & 0.75 & 0.75 & \citet{gali2015monetary} \\
+$\epsilon$ (elasticity of sub.) & 6.0 & 6.0 & 6.0 & 6.0 & Standard \\
+\addlinespace
+\multicolumn{6}{l}{\textit{Energy sector}} \\
+$\alpha_e$ (energy share) & 0.30 & 0.04 & 0.06 & 0.05 & National accounts \\
+Oil import share & 0.00 & 0.03 & 0.05 & 0.04 & EIA/IEA data \\
+Oil export share & 0.20 & 0.005 & 0.00 & 0.01 & EIA/IEA data \\
+\addlinespace
+\multicolumn{6}{l}{\textit{Trade}} \\
+Trade openness ($\omega$) & 0.25 & 0.25 & 0.35 & 0.40 & World Bank WDI \\
+Trade with Iran & 1.00 & 0.005 & 0.015 & 0.008 & DOTS \\
+\addlinespace
+\multicolumn{6}{l}{\textit{Monetary policy}} \\
+$\phi_\pi$ (inflation response) & 1.2 & 1.5 & 1.3 & 1.4 & Taylor rule estimates \\
+$\phi_y$ (output response) & 0.3 & 0.5 & 0.8 & 0.4 & Taylor rule estimates \\
+$\rho_i$ (smoothing) & 0.70 & 0.85 & 0.75 & 0.80 & Central bank behavior \\
+\addlinespace
+\multicolumn{6}{l}{\textit{Scale and military}} \\
+GDP share (global) & 0.02 & 0.28 & 0.20 & 0.50 & IMF WEO \\
+Military/GDP & 0.025 & 0.035 & 0.017 & 0.018 & SIPRI \\
+SPR capacity & 0.00 & 0.50 & 0.80 & 0.30 & IEA data \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\small
+\item \textit{Notes:} Quarterly model. Iran's $\alpha_e = 0.30$ reflects its status as a major oil exporter where energy revenue dominates the economy. China's high SPR capacity (0.8) reflects approximately 90 days of import cover. GDP shares are approximate PPP-adjusted shares of the four-region world.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{War Shock Calibration}
+
+The war shock profiles are calibrated to match both the scenario specifics and the empirical magnitudes in \citet{federle2026price}. Table~\ref{tab:shocks} summarizes the key shock parameters.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{War Shock Calibration}
+\label{tab:shocks}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Shock & Functional Form & Peak Value & Decay Rate \\
+\midrule
+\multicolumn{4}{l}{\textit{Real-side shocks}} \\
+Iran capital destruction & $0.06 \cdot e^{-0.10t}$ & 6.0\% & 0.10/qtr \\
+Iran trade disruption & $0.08 \cdot e^{-0.12t}$ & 8.0\% & 0.12/qtr \\
+Hormuz blockade severity & $0.70 \cdot e^{-0.05t}$ & 70\% & 0.05/qtr \\
+US military spending & $0.025 \cdot e^{-0.05t}$ & 2.5pp GDP & 0.05/qtr \\
+\addlinespace
+\multicolumn{4}{l}{\textit{Financial shocks}} \\
+Iran spread shock & $0.05 \cdot e^{-0.08t}$ & 500 bp & 0.08/qtr \\
+Iran capital flight & $-0.15 \cdot e^{-0.10t}$ & $-15\%$ GDP & 0.10/qtr \\
+Iran equity shock & $-0.40$ at $t=0$ & $-40\%$ & Impact only \\
+US spread & $-0.002$ (constant) & $-20$ bp & -- \\
+US safe-haven inflow & $0.03 \cdot e^{-0.10t}$ & 3\% GDP & 0.10/qtr \\
+ROW spread shock & $0.005 \cdot e^{-0.10t}$ & 50 bp & 0.10/qtr \\
+\addlinespace
+\multicolumn{4}{l}{\textit{China stabilization}} \\
+SPR release & $0.008 \cdot e^{-0.1t}$ & 0.8\% & 0.10/qtr \\
+Renewable substitution & $0.002(1-e^{-0.15t})$ & 0.2\% & Gradual \\
+Manufacturing boost & $0.015(1-e^{-0.2t})$ & 1.5\% & Gradual \\
+FX intervention & $-0.01$ ($t < 8$) & -- & 8 quarters \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\small
+\item \textit{Notes:} All values expressed as fractions (e.g., 0.06 = 6 percent). Blockade duration is 8 quarters in the baseline scenario. Financial shocks are calibrated to match typical emerging market crisis dynamics.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Financial Linkage Matrix}
+
+The financial contagion matrix $\mathbf{L}$ governs cross-regional spread transmission:
+\begin{equation}
+\mathbf{L} = \begin{pmatrix}
+0.00 & 0.05 & 0.10 & 0.15 \\
+0.02 & 0.00 & 0.08 & 0.12 \\
+0.03 & 0.05 & 0.00 & 0.10 \\
+0.05 & 0.03 & 0.05 & 0.00
+\end{pmatrix}
+\label{eq:linkage_matrix}
+\end{equation}
+where rows correspond to the source region (Iran, US, China, ROW) and columns to the destination. Iran has relatively large outward contagion to ROW (0.15) and China (0.10), reflecting the global risk-off dynamics triggered by a Middle Eastern conflict, despite Iran's limited direct financial linkages.
+
+
+% ============================================================================
+% V. RESULTS
+% ============================================================================
+
+\section{Results}
+\label{sec:results}
+
+We simulate the model over 32 quarters (8 years) and report results for two versions: (i) the trade-channel-only model, and (ii) the full model with financial channels. We then analyze China's stabilization role and perform sensitivity analysis across war severity scenarios.
+
+\subsection{Baseline Impulse Responses}
+
+Figure~\ref{fig:impulse} presents the impulse response functions for the six core macroeconomic variables across all four regions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/figure2_impulse_responses.png}
+\caption{Impulse Responses to War Onset}
+\label{fig:impulse}
+\begin{minipage}{\textwidth}
+\vspace{0.3em}
+\small \textit{Notes:} Impulse responses to a war of baseline intensity (Hormuz blockade severity 70 percent). Shaded areas indicate 90 percent confidence bands from parameter uncertainty. Horizontal axis: years after war onset.
+\end{minipage}
+\end{figure}
+
+\textit{Iran (war site).} Iran suffers the most severe impact, with GDP declining 27.2 percent at trough (Panel A). This substantially exceeds the average war-site effect of $-10$ percent documented by \citet{federle2026price}, reflecting three reinforcing mechanisms: physical capital destruction, trade disruption from the blockade, and---uniquely---the loss of oil export revenue that constitutes 30 percent of Iran's economic activity. Consumer prices surge 7.2 percentage points (Panel B) despite the output collapse, reflecting a classic stagflation pattern driven by supply-side destruction. Investment collapses by over 35 percent (Panel C) as both physical destruction and soaring risk premia deter capital formation.
+
+\textit{US-Israel (belligerent).} The US-Israel bloc experiences a modest positive GDP effect of 1.7 percent (Panel A), driven by military Keynesian stimulus of 2.5 percent of GDP. This is consistent with \citeauthor{federle2026price}'s finding that belligerent countries experience near-zero average GDP effects, with military spending roughly offsetting the costs of war. However, consumer prices rise by 1.5 percentage points (Panel B) due to the global oil price increase, and the Federal Reserve responds with rate increases of 2.6 percentage points (Panel D). The welfare implications of this apparent GDP ``gain'' are negative, as we show in Section~\ref{sec:welfare}.
+
+\textit{China (stabilizer).} China experiences a contained GDP decline of 1.2 percent, despite being a major oil importer ($\alpha_e = 0.06$). The stabilization mechanisms---SPR releases, renewable substitution, and manufacturing expansion---moderate what would otherwise be a larger negative impact. Inflation rises by 2.4 percentage points, the highest among non-war-site regions, reflecting China's energy-intensive industrial structure.
+
+\textit{Rest of World.} ROW GDP declines by 3.8 percent in the full model with financial channels, significantly exceeding the 1.1 percent decline under trade channels alone. This amplification, analyzed in detail in Section~\ref{sec:financial}, demonstrates the quantitative importance of financial transmission.
+
+\textit{Oil prices.} Panel E shows global oil prices surging 63 percent at peak under the baseline scenario. The comparison between simulations with and without China's stabilization reveals a meaningful dampening effect, with the peak approximately 5 percentage points lower when China intervenes.
+
+\subsection{Trade Exposure Channel}
+
+Figure~\ref{fig:trade} disaggregates the trade channel into its components.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/figure3_trade_exposure.png}
+\caption{Trade Exposure and Spillover Channels}
+\label{fig:trade}
+\begin{minipage}{\textwidth}
+\vspace{0.3em}
+\small \textit{Notes:} Decomposition of trade-channel spillovers by component. Trade disruption captures direct bilateral trade losses. Energy exposure captures the oil price channel. Net exports reflect exchange rate and demand effects.
+\end{minipage}
+\end{figure}
+
+The Hormuz blockade creates a uniquely potent trade channel that operates primarily through energy markets rather than bilateral goods trade. While \citet{federle2026price} find that direct bilateral trade exposure is the primary spillover mechanism in their cross-country sample, our scenario highlights an important asymmetry: when a war disrupts a critical chokepoint for global commodity trade, the energy price channel dominates the bilateral trade channel by a factor of approximately 3:1 for third countries.
+
+\subsection{Financial Channel Amplification}
+\label{sec:financial}
+
+Figure~\ref{fig:financial} presents the financial channel variables for all four regions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/figure4_financial_channels.png}
+\caption{Financial Channel Responses}
+\label{fig:financial}
+\begin{minipage}{\textwidth}
+\vspace{0.3em}
+\small \textit{Notes:} Sovereign spreads in basis points. Capital flows as net inflows (percent of GDP). Exchange rate: positive denotes depreciation. Equity indices as percent deviation from pre-war level.
+\end{minipage}
+\end{figure}
+
+\textit{Sovereign spreads (Panel A).} Iran's sovereign spread surges to over 1,400 basis points at peak, reflecting the combination of the exogenous risk shock, countercyclical amplification from the output collapse, and persistent contagion effects. ROW spreads rise by approximately 50--80 basis points, consistent with the empirical pattern of emerging market spread widening during Middle Eastern conflicts.
+
+\textit{Capital flows (Panel B).} Capital flows exhibit the classic ``risk-off'' pattern: massive outflows from Iran ($-$15 percent of GDP at peak), safe-haven inflows to the US, and moderate outflows from China and ROW. China's forex intervention partially stabilizes its capital account.
+
+\textit{Equity markets (Panel C).} Iran's equity index collapses by 60 percent. The US experiences an initial decline followed by recovery driven by defense sector gains and safe-haven demand. China and ROW equity markets suffer sustained declines of 40--60 percent, reflecting both the direct output effects and the global risk-off environment.
+
+\textit{Amplification magnitude.} Table~\ref{tab:amplification} reports the comparison between trade-only and full-model (trade plus financial) results.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Financial Channel Amplification: Trade Only vs.\ Full Model}
+\label{tab:amplification}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+& Trade Only & Trade + Financial & Amplification Factor \\
+\midrule
+Iran peak GDP loss & $-16.4\%$ & $-27.2\%$ & 1.66$\times$ \\
+ROW peak GDP loss & $-1.1\%$ & $-3.8\%$ & 3.45$\times$ \\
+China peak GDP loss & $-1.2\%$ & $-1.2\%$ & 1.00$\times$ \\
+US-Israel peak GDP & $+1.7\%$ & $+1.7\%$ & -- \\
+Iran peak inflation & $+7.2$pp & $+7.2$pp & 1.00$\times$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\small
+\item \textit{Notes:} Trade Only refers to the v1 model without financial channels. Trade + Financial is the v2 model with sovereign spreads, capital flows, equity markets, and contagion. Amplification factor is the ratio of full-model to trade-only effects.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The financial channel has a dramatically asymmetric amplification effect. ROW experiences a 3.45$\times$ amplification---its output loss increases from 1.1 to 3.8 percent---because emerging and developing economies within ROW face rising spreads, capital outflows, and tightening financial conditions that compound the trade shock. China, by contrast, shows no amplification (1.00$\times$), as its forex intervention and managed capital account insulate the domestic financial system from global risk-off dynamics. This finding has important implications for the debate on capital account management during crises \citep{rey2015dilemma}.
+
+\subsection{China's Stabilization Role}
+
+Figure~\ref{fig:china} decomposes China's triple stabilization mechanism.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/figure5_china_stabilization.png}
+\caption{China's Triple Stabilization Mechanism}
+\label{fig:china}
+\begin{minipage}{\textwidth}
+\vspace{0.3em}
+\small \textit{Notes:} Comparison of macroeconomic outcomes with and without China's stabilization. ``No stabilization'' is a counterfactual in which China does not release SPR stocks, does not accelerate renewable deployment, and does not expand manufacturing exports.
+\end{minipage}
+\end{figure}
+
+Table~\ref{tab:china_decomp} reports the marginal contribution of each stabilization channel.
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Decomposition of China's Stabilization Effect}
+\label{tab:china_decomp}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Mechanism & Global GDP Loss & Global Inflation Peak & Oil Price Peak \\
+\midrule
+No stabilization & $-0.80\%$ & $+1.98$pp & $+68\%$ \\
+\quad + SPR release only & $-0.75\%$ & $+1.88$pp & $+63\%$ \\
+\quad + SPR + renewables & $-0.74\%$ & $+1.86$pp & $+63\%$ \\
+\quad + Full triple mechanism & $-0.65\%$ & $+1.69$pp & $+63\%$ \\
+\addlinespace
+\textbf{Total stabilization effect} & \textbf{0.15pp} & \textbf{0.29pp} & \textbf{5pp} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\small
+\item \textit{Notes:} Global values are GDP-weighted averages across all four regions. Each row adds one mechanism to the previous row. The SPR channel accounts for approximately 60 percent of the total stabilization effect, manufacturing expansion for 33 percent, and renewable substitution for 7 percent.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The SPR release is the most immediately impactful channel, reducing global GDP losses by 0.05 percentage points and oil prices by 5 percentage points. However, the manufacturing export channel becomes increasingly important over time as the war persists, contributing 0.09 percentage points of global GDP loss reduction through supply-chain substitution. The renewable energy channel operates on the longest time horizon and contributes modestly (0.01 percentage point) within the simulation window, though its effects would compound significantly over longer horizons.
+
+\subsection{War Severity Scenarios}
+
+Figure~\ref{fig:severity} compares outcomes across three war intensity scenarios.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/figure6_severity.png}
+\caption{War Severity Scenarios: Mild, Baseline, and Severe}
+\label{fig:severity}
+\begin{minipage}{\textwidth}
+\vspace{0.3em}
+\small \textit{Notes:} Mild: limited strikes, 30 percent blockade, 4-quarter duration. Baseline: full strikes, 70 percent blockade, 8-quarter duration. Severe: prolonged war, 90 percent blockade, 12-quarter duration.
+\end{minipage}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\begin{threeparttable}
+\caption{Scenario Comparison: War Severity}
+\label{tab:severity}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Scenario & Iran GDP & Oil Price Peak & Global GDP & ROW GDP \\
+\midrule
+Mild (limited strikes) & $-8.9\%$ & $+34\%$ & $-0.37\%$ & $-0.7\%$ \\
+Baseline (full strikes) & $-16.4\%$ & $+63\%$ & $-0.65\%$ & $-1.1\%$ \\
+Severe (prolonged war) & $-24.8\%$ & $+78\%$ & $-0.69\%$ & $-1.3\%$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\small
+\item \textit{Notes:} Trade-channel-only model results. Mild scenario: blockade severity 0.30, destruction scale 0.5$\times$, 4-quarter blockade. Severe scenario: blockade severity 0.90, destruction scale 1.8$\times$, 12-quarter blockade.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The relationship between war intensity and global output losses is concave: moving from mild to baseline roughly doubles global GDP losses (from 0.37 to 0.65 percent), but moving from baseline to severe adds only 0.04 percentage points. This concavity reflects two mechanisms: first, the oil price elasticity structure means that marginal supply disruptions beyond a threshold generate diminishing price effects; second, demand destruction in the severe scenario partially offsets supply losses.
+
+\subsection{Welfare Analysis}
+\label{sec:welfare}
+
+We compute consumption-equivalent welfare losses following \citet{lucas1987models}, discounting at $\beta = 0.99$ per quarter. Figure~\ref{fig:welfare} reports the results.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/figure7_welfare.png}
+\caption{Consumption-Equivalent Welfare Losses}
+\label{fig:welfare}
+\begin{minipage}{0.75\textwidth}
+\vspace{0.3em}
+\small \textit{Notes:} Consumption-equivalent welfare loss (discount factor 0.99). Global values are GDP-weighted. Bars compare outcomes with and without China's stabilization.
+\end{minipage}
+\end{figure}
+
+Several findings emerge. First, Iran's welfare loss ($-16.5$ percent consumption equivalent) is approximately twice its peak GDP loss, reflecting the persistence of the output decline and the additional welfare cost of inflation. Second, the US-Israel bloc experiences a welfare \textit{loss} despite a positive GDP effect, because the military spending that drives the GDP increase substitutes for private consumption. Third, China's stabilization reduces the global welfare loss from approximately 0.61 to 0.43 percent of permanent consumption, equivalent to approximately \$2.2 trillion in present value at current global GDP.
+
+
+% ============================================================================
+% VI. CONCLUSION
+% ============================================================================
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper develops a four-region New Keynesian DSGE model to analyze the macroeconomic consequences of a US--Israel conflict with Iran featuring a Hormuz Strait blockade. By embedding the trade-exposure spillover mechanism of \citet{federle2026price} within a structural framework augmented with financial channels, we make three contributions to the literature on the economics of war.
+
+First, we demonstrate that the Hormuz chokepoint creates a uniquely potent transmission mechanism. The energy price channel dominates bilateral trade as the primary spillover vector, generating global oil price increases of 63 percent and GDP losses that extend far beyond Iran's direct trading partners. Iran's peak GDP loss of 27.2 percent---substantially larger than the average war-site effect in \citeauthor{federle2026price}---reflects the compounding of physical destruction with the loss of oil export revenue.
+
+Second, we show that financial channels amplify the real-side effects asymmetrically. ROW output losses increase by a factor of 3.45$\times$ when financial contagion is incorporated, while China's managed capital account and active intervention insulate it from amplification. This finding contributes to the debate on capital account management and macroprudential policy during geopolitical crises.
+
+Third, and most novel, we quantify China's role as a global economic stabilizer. China's triple mechanism---SPR releases, renewable energy substitution, and manufacturing export expansion---reduces cumulative global GDP losses by \$2.2 trillion and lowers peak global inflation by 0.29 percentage points. This finding challenges the prevailing narrative that frames China's global economic role primarily in terms of competitive disruption. In the context of a major geopolitical crisis, China's large strategic reserves, diversified energy mix, and manufacturing capacity enable it to serve as a ``global economic ballast,'' dampening the macroeconomic volatility that would otherwise propagate through trade and financial channels.
+
+Several caveats apply. Our model is solved by sequential linearization rather than full nonlinear methods, which may understate nonlinearities in extreme scenarios. The financial linkage matrix is calibrated rather than estimated, and the welfare calculations abstract from distributional effects. Future work could embed our framework in an estimated Bayesian DSGE model with richer financial frictions, endogenous conflict dynamics, and heterogeneous agents.
+
+The policy implications are clear. The Strait of Hormuz remains a critical vulnerability for the global economy, and military planners should incorporate the full general-equilibrium costs---including financial contagion and third-country spillovers---into strategic assessments. For China, the results suggest that investments in strategic reserves, renewable energy capacity, and manufacturing resilience generate positive externalities for global stability that extend well beyond their domestic benefits. For the international community, the findings underscore the importance of multilateral SPR coordination and energy diversification as insurance against geopolitical supply disruptions.
+
+
+% ============================================================================
+% REFERENCES
+% ============================================================================
+
+\newpage
+\bibliographystyle{aer}
+
+\begin{thebibliography}{99}
+
+\bibitem[Abadie and Gardeazabal(2003)]{abadie2003economic}
+Abadie, Alberto, and Javier Gardeazabal. 2003. ``The Economic Costs of Conflict: A Case Study of the Basque Country.'' \textit{American Economic Review}, 93(1): 113--132.
+
+\bibitem[Autor, Dorn, and Hanson(2013)]{autor2013china}
+Autor, David H., David Dorn, and Gordon H. Hanson. 2013. ``The China Syndrome: Local Labor Market Effects of Import Competition in the United States.'' \textit{American Economic Review}, 103(6): 2121--2168.
+
+\bibitem[Barro(2006)]{barro2006rare}
+Barro, Robert J. 2006. ``Rare Disasters and Asset Markets in the Twentieth Century.'' \textit{Quarterly Journal of Economics}, 121(3): 823--866.
+
+\bibitem[Bernanke(2005)]{bernanke2005global}
+Bernanke, Ben S. 2005. ``The Global Saving Glut and the U.S.\ Current Account Deficit.'' Sandridge Lecture, Virginia Association of Economists.
+
+\bibitem[Blanchard and Gal\'{i}(2007)]{blanchard2007macroeconomic}
+Blanchard, Olivier J., and Jordi Gal\'{i}. 2007. ``The Macroeconomic Effects of Oil Price Shocks: Why Are the 2000s So Different from the 1970s?'' NBER Working Paper 13368.
+
+\bibitem[Bodenstein, Erceg, and Guerrieri(2011)]{bodenstein2011oil}
+Bodenstein, Martin, Christopher J. Erceg, and Luca Guerrieri. 2011. ``Oil Shocks and External Adjustment.'' \textit{Journal of International Economics}, 83(2): 168--184.
+
+\bibitem[Caldara and Iacoviello(2022)]{caldara2022measuring}
+Caldara, Dario, and Matteo Iacoviello. 2022. ``Measuring Geopolitical Risk.'' \textit{American Economic Review}, 112(4): 1194--1225.
+
+\bibitem[{Energy Information Administration}(2023)]{eia2023hormuz}
+Energy Information Administration. 2023. ``The Strait of Hormuz Is the World's Most Important Oil Transit Chokepoint.'' EIA Today in Energy, June 20.
+
+\bibitem[Federle et~al.(2026)]{federle2026price}
+Federle, Jonathan, Andr\'{e} Meier, Gernot J. M\"{u}ller, Willi Mutschler, and Moritz Schularick. 2026. ``The Price of War.'' \textit{American Economic Review}, 116(3): 791--827.
+
+\bibitem[Gal\'{i}(2015)]{gali2015monetary}
+Gal\'{i}, Jordi. 2015. \textit{Monetary Policy, Inflation, and the Business Cycle: An Introduction to the New Keynesian Framework}. 2nd ed. Princeton: Princeton University Press.
+
+\bibitem[Hamilton(1983)]{hamilton1983oil}
+Hamilton, James D. 1983. ``Oil and the Macroeconomy since World War II.'' \textit{Journal of Political Economy}, 91(2): 228--248.
+
+\bibitem[Hamilton(2009)]{hamilton2009understanding}
+Hamilton, James D. 2009. ``Understanding Crude Oil Prices.'' \textit{Energy Journal}, 30(2): 179--206.
+
+\bibitem[Helveston et~al.(2019)]{helveston2019china}
+Helveston, John P., Yimin He, and Michael R. Davidson. 2019. ``Quantifying the Cost Savings of Global Solar Photovoltaic Supply Chains.'' \textit{Nature}, 612: 83--87.
+
+\bibitem[Jord\`{a}(2005)]{jorda2005estimation}
+Jord\`{a}, \`{O}scar. 2005. ``Estimation and Inference of Impulse Responses by Local Projections.'' \textit{American Economic Review}, 95(1): 161--182.
+
+\bibitem[Kilian(2009)]{kilian2009not}
+Kilian, Lutz. 2009. ``Not All Oil Price Shocks Are Alike: Disentangling Demand and Supply Shocks in the Crude Oil Market.'' \textit{American Economic Review}, 99(3): 1053--1069.
+
+\bibitem[Longstaff et~al.(2011)]{longstaff2011financial}
+Longstaff, Francis A., Jun Pan, Lasse H. Pedersen, and Kenneth J. Singleton. 2011. ``How Sovereign Is Sovereign Credit Risk?'' \textit{American Economic Journal: Macroeconomics}, 3(2): 75--103.
+
+\bibitem[Lucas(1987)]{lucas1987models}
+Lucas, Robert E., Jr. 1987. \textit{Models of Business Cycles}. Oxford: Basil Blackwell.
+
+\bibitem[Ramey(2011)]{ramey2011identifying}
+Ramey, Valerie A. 2011. ``Identifying Government Spending Shocks: It's All in the Timing.'' \textit{Quarterly Journal of Economics}, 126(1): 1--50.
+
+\bibitem[Rey(2015)]{rey2015dilemma}
+Rey, H\'{e}l\`{e}ne. 2015. ``Dilemma Not Trilemma: The Global Financial Cycle and Monetary Policy Independence.'' NBER Working Paper 21162.
+
+\bibitem[Zhang et~al.(2020)]{zhang2020china}
+Zhang, Dayong, Qiang Ji, and Apostolos Kiohos. 2020. ``China's Oil Strategic Petroleum Reserve: A DSGE Analysis.'' \textit{Energy Economics}, 88: 104748.
+
+\end{thebibliography}
+
+
+% ============================================================================
+% APPENDIX (FOR ONLINE PUBLICATION)
+% ============================================================================
+
+\newpage
+\appendix
+\section*{Appendix: Model Equations Summary}
+\addcontentsline{toc}{section}{Appendix}
+
+For reference, we collect the complete system of equations for each region $i$:
+
+\begin{align}
+\pi_{i,t} &= \beta \, \mathbb{E}_t[\pi_{i,t+1}] + \kappa_i \, \hat{y}_{i,t-1} + \xi^{\text{supply}}_{i,t} \tag{A.1} \\[6pt]
+\hat{y}_{i,t} &= \rho \, \hat{y}_{i,t-1} - \frac{1}{\sigma_i}(i_{i,t} - \mathbb{E}_t[\pi_{i,t+1}]) + 0.8 \, g^{\text{mil}}_{i,t} - \tau^{\text{trade}}_{i,t} - 0.3 \, \alpha_{e,i} \Delta p^{\text{oil}}_t + \Phi^{\text{fin}}_{i,t} \tag{A.2} \\[6pt]
+i_{i,t} &= \rho_{i,i} \, i_{i,t-1} + (1-\rho_{i,i})(\phi_{\pi,i} \pi_{i,t} + \phi_{y,i} \hat{y}_{i,t-1}) \tag{A.3} \\[6pt]
+s_{i,t} &= s^{\text{shock}}_{i,t} + 0.3 \max(-\hat{y}_{i,t-1}, 0) + 0.2 \, s_{i,t-1} \tag{A.4} \\[6pt]
+k_{i,t} &= k^{\text{shock}}_{i,t} - 2 s_{i,t} + 0.5(i_{i,t} - 0.02) + 0.3 \, k_{i,t-1} \tag{A.5} \\[6pt]
+q_{i,t} &= 0.6 \, q_{i,t-1} + 10 g^e_{i,t} - 8(i_{i,t} + s_{i,t}) - 3 \max(-\hat{y}_{i,t},0) + q^{\text{shock}}_{i,t} \tag{A.6} \\[6pt]
+e_{i,t} &= 0.4 \, e_{i,t-1} + 0.5 \, s_{i,t} - 0.3 \, k_{i,t} + \iota^{\text{fx}}_{i,t} \tag{A.7} \\[6pt]
+\Phi^{\text{fin}}_{i,t} &= -0.15 \, s_{i,t} - 0.10 \max(-k_{i,t}, 0) \tag{A.8}
+\end{align}
+
+The global oil market clears according to:
+\begin{align}
+\Delta S_t &= \lambda^{\text{block}}_t (s^H - s^{\text{Iran}}) + s^{\text{Iran}} \lambda^{\text{prod}} - 0.3 \lambda^{\text{block}}_t (s^H - s^{\text{Iran}}) \tag{A.9} \\[6pt]
+\frac{\Delta P^{\text{oil}}_t}{P^{\text{oil}}} &= \frac{\Delta S_t - \text{SPR}_t + \Delta D_t}{|\varepsilon_d| + \varepsilon_s} \tag{A.10}
+\end{align}
+
+Financial contagion operates through:
+\begin{equation}
+\tilde{s}^{\text{shock}}_{j,t} = s^{\text{shock}}_{j,t} + 0.1 \Big(\textstyle\sum_{i \neq j} L_{ij} s_{i,t-1}\Big)(1 + 2\max(-k_{\text{Iran},t}, 0)) \tag{A.11}
+\end{equation}
+
+\end{document}
