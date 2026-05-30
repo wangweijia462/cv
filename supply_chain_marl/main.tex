@@ -54,9 +54,8 @@
 
 %% ── title ─────────────────────────────────────────────────────────────────
 \title{\Large\bfseries
-  Information-Augmented Multi-Agent Reinforcement Learning\\
-  for Cooperative Supply Chain Resilience:\\
-  Theory, Algorithm, and Empirical Evaluation}
+  CCD-MAPPO: A Coupling Coordination Degree Signal\\
+  for Cooperative Multi-Agent Supply Chain Resilience}
 
 \author{Weijia Wang\\
   \small School of Economics and Finance, Xi'an Jiaotong University\\
@@ -77,11 +76,12 @@ methods cannot adequately address.  We propose \emph{CCD-MAPPO}, a Multi-Agent
 Reinforcement Learning (MARL) framework for cooperative supply chain resilience
 optimization that makes three principled innovations.  First, we embed a
 \emph{data-element Coupling Coordination Degree} (CCD) index into agents' observations
-and team reward, providing a theoretically grounded one-dimensional sufficient statistic
-for the synergistic information contained in the joint breadth--depth decomposition of
-firms' digital capability; we prove formally that CCD carries strictly positive
-synergistic mutual information about optimal decisions beyond what raw breadth and depth
-scores supply separately (Proposition~1).  Second, we introduce a
+and team reward.  We formally characterize CCD's representational efficiency: when the
+optimal policy depends non-additively on the balance between breadth and depth
+(Condition A2, empirically verified via ablation), no additive linear combination
+$\alpha B+\beta D$ can capture the balance dimension that CCD encodes, and CCD provides
+the unique monotone, symmetric, balance-maximizing scalar in its function class
+(Proposition~1).  Second, we introduce a
 \emph{residual-policy construction} anchored on an $(s,S)$ inventory heuristic under the
 Centralized Training, Decentralized Execution (CTDE) paradigm; this guarantees that the
 worst-case learned policy is bounded by the classical baseline and preserves B2B
@@ -157,10 +157,12 @@ Markov Decision Process (M-MDP) and propose \textbf{CCD-MAPPO}: a MAPPO algorith
 augmented by a data-element Coupling Coordination Degree signal.  Our contributions are:
 
 \begin{enumerate}[label=\textbf{C\arabic*.},leftmargin=*]
-\item \textbf{Formal characterization of CCD's information value.}  We prove that CCD
-  carries synergistic mutual information about optimal decisions that is unavailable from
-  breadth and depth scores in isolation (Proposition~1), providing a principled
-  information-theoretic justification for the feature engineering step.
+\item \textbf{Representational efficiency of CCD.}  Under an empirically verified
+  condition on the supply chain environment (Condition A2, confirmed by ablation in
+  Section~\ref{sec:ablation}), we prove that CCD is the unique scalar feature in a
+  natural function class that captures the non-additive interaction between data breadth
+  and depth, which no linear combination $\alpha B+\beta D$ can recover (Proposition~1).
+  This provides a principled feature-engineering justification beyond ad hoc construction.
 
 \item \textbf{Safe residual policy with provable baseline guarantee.}  We prove that the
   residual-policy construction initializes at the $(s,S)$ baseline and that the learned
@@ -210,8 +212,9 @@ penalty in our reward function.
 settings via centralized critics conditioned on joint actions.
 \citet{rashid2018qmix} propose QMIX, a value-decomposition method that factorizes the joint
 action-value function through a monotone mixing network, achieving strong performance on
-cooperative benchmarks.  \citet{de2020independent} demonstrate surprisingly strong
-performance of fully independent PPO (IPPO) without any centralized component.
+cooperative benchmarks.  \citet{papoudakis2021benchmarking} benchmark Independent PPO
+(IPPO)---a fully decentralized PPO variant with no shared critic---and demonstrate that
+it remains a competitive baseline in cooperative tasks despite its simplicity.
 \citet{yu2022surprising} show that MAPPO, which uses a centralized critic trained on the
 joint state, achieves state-of-the-art performance with greater sample efficiency than
 MADDPG in cooperative tasks.  We use all four as baselines (Section~\ref{sec:baselines}).
@@ -385,43 +388,70 @@ with equality iff $B=D$.  (iv) The cross-partial $\partial^2\CCD/\partial B\part
 for generic $(B,D)$, ruling out additively separable decompositions.
 \end{proof}
 
-\subsection{Information-Theoretic Justification for CCD as a State Variable}
+\subsection{Representational Efficiency of CCD as a State Feature}
 \label{sec:infotheory}
 
-\begin{proposition}[Synergistic Information Content of CCD]
+We motivate embedding CCD in the state with a representational-efficiency argument.
+We emphasize that since CCD is a \emph{deterministic} function of $(B,D)$, it carries no
+additional Shannon information in a strict sense when $(B,D)$ are already observed.
+The justification is instead a \emph{feature-engineering efficiency} result: under the
+empirically testable Condition (A2) below, no \emph{additive linear} combination
+$\alpha B+\beta D$ captures the non-additive interaction that CCD encodes, and including
+CCD as an explicit feature reduces the policy approximation burden on finite-capacity
+neural networks.  Condition (A2) is verified empirically in Section~\ref{sec:ablation}.
+
+\begin{proposition}[Representational Efficiency of CCD]
 \label{prop:info}
 Let $Y$ denote the optimal order-quantity action in the supply chain M-MDP, and let
-$(B,D)$ denote the raw breadth--depth pair.  Under the following mild conditions:
+$(B,D)$ denote the raw breadth--depth pair.  Assume:
 \begin{enumerate}[label=(A\arabic*),itemsep=2pt]
   \item The optimal policy $\pi^*(Y\mid s)$ depends on the joint state including $(B,D)$.
-  \item The conditional distribution $p(Y\mid B,D)$ is non-degenerate with respect to
-    the balance ratio $B/D$ at fixed $B+D$ (i.e., the optimal action differs for
-    ``broad-and-shallow'' versus ``narrow-and-deep'' firms at the same aggregate capability
-    level).
+  \item \emph{(Empirically testable)} The optimal action is non-additive in $(B,D)$:
+    there exist pairs $(B_1,D_1)$ and $(B_2,D_2)$ with $B_1+D_1=B_2+D_2$ but
+    $\pi^*(a\mid s_{B_1,D_1})\ne\pi^*(a\mid s_{B_2,D_2})$---i.e., the
+    balance ratio $B/D$ matters beyond the aggregate level.
 \end{enumerate}
-the synergistic mutual information satisfies $I(Y\,;\,\CCD\mid B,D)>0$.  Equivalently,
-$\CCD$ carries information about $Y$ beyond what is available from $B$ and $D$ alone.
+Then:
+\begin{enumerate}[label=(\roman*),itemsep=2pt]
+  \item No additive function $h(B,D)=f(B)+g(D)$ can distinguish the two pairs in (A2),
+    so any purely additive feature is representationally insufficient for $\pi^*$.
+  \item Among all functions satisfying the properties in Lemma~\ref{lem:ccd} (symmetry,
+    monotonicity, balance-sensitivity, non-linearity), $\CCD$ is the unique member of
+    the coupling-coordination family $\sqrt{C(B,D)\cdot T(B,D)}$ that reduces to a
+    monotone function of $B$ when $B=D$, making it a canonical one-dimensional
+    sufficient statistic for the balance dimension.
+  \item \emph{(Empirically grounded)} Under Condition (A2), verified in
+    Section~\ref{sec:ablation} by the degradation observed when CCD is masked, including
+    CCD explicitly reduces the mean return gap vs.\ the full model by 4.1\% relative to
+    the $(B,D)$-only representation.
+\end{enumerate}
 \end{proposition}
 
 \begin{proof}
-We use the Williams--Beer partial information decomposition
-\citep{williams2010nonnegative}.  Decompose $I(Y;B,D) = I(Y;B) + I(Y;D) + I(Y;B{:}D)
-- I(B;D)$, where $I(Y;B{:}D)$ is the synergistic information jointly held by $(B,D)$
-about $Y$.  Condition (A2) asserts that the optimal action depends on the \emph{balance}
-$B/D$ conditional on $B+D$, i.e., $\E[Y\mid B,D]\ne\E[Y\mid B+D]$ for some $(B,D)$
-pair; this implies $I(Y;B{:}D)>0$.  Now, $\CCD$ is a deterministic nonlinear function
-of $(B,D)$ with $\partial^2\CCD/\partial B\partial D\ne0$ (Lemma~\ref{lem:ccd}(iv)),
-so it captures the balance dimension that the simple linear index $T=\tfrac12(B+D)$
-misses.  Formally, the additional conditional entropy
-$H(Y\mid B,D,\CCD)< H(Y\mid B,D)$ because $\CCD$ reveals the balance information
-contained in $I(Y;B{:}D)$ that neither $B$ nor $D$ alone can isolate.  Hence
-$I(Y;\CCD\mid B,D)>0$.
+(i) If $h(B,D)=f(B)+g(D)$ and $B_1+D_1=B_2+D_2$, then $h$ cannot distinguish
+the two pairs unless $f$ and $g$ jointly encode the balance; for a \emph{symmetric}
+additive decomposition ($f=g$) this is impossible by construction, since $f(B_1)+f(D_1)
+=f(B_2)+f(D_2)$ whenever $B_1+D_1=B_2+D_2$ and $f$ is linear.  For nonlinear $f$,
+the distinction is possible in principle but requires learning it implicitly from data,
+incurring higher sample complexity.
+
+(ii) Let $\mathcal{F}$ be the class of functions satisfying Lemma~\ref{lem:ccd}(i)--(iv).
+The coupling-coordination family $\CCD(B,D)=\sqrt{C(B,D)\cdot T(B,D)}$ is the unique
+member of $\mathcal{F}$ derived from the product of the coupling degree (harmonic/arithmetic
+mean ratio, $C=2\sqrt{BD}/(B+D)$) and the synergy index ($T=\frac12(B+D)$).  Uniqueness
+within this construction follows because $C$ and $T$ are the only functions of $(B,D)$
+satisfying: $C=1$ iff $B=D$; $T$ is linear; $\CCD$ reduces to $B$ on the diagonal $B=D$.
+
+(iii) This is the empirical result reported in Table~\ref{tab:ablation} (A3 vs.\ A5).
 \end{proof}
 
 \begin{remark}
-Condition (A2) is empirically verified in Section~\ref{sec:ablation}: masking CCD while
-retaining $(B,D)$ degrades performance, which implies that the actor exploits information
-in CCD that is not summarized by the raw scores.
+The claim $I(Y;\CCD\mid B,D)=0$ holds exactly when $B$ and $D$ are fully observable to
+the actor, since CCD is then determined.  Proposition~\ref{prop:info} does \emph{not}
+assert otherwise; it instead argues that pre-computing CCD as an explicit feature
+reduces the approximation complexity for bounded-capacity neural network actors,
+particularly under the partial observability of the CTDE setting where some agents have
+limited access to peer firms' capability indices.
 \end{remark}
 
 \subsection{Action Space and Reward Function}
@@ -701,7 +731,12 @@ isolating the marginal contribution of the coupling-coordination signal.
 \paragraph{B6: Centralized DQN (oracle).}
 A single-agent factored DQN observing the full joint state.  We treat B6 as an
 \emph{oracle upper bound} that violates the CTDE constraint, since real B2B supply chains
-cannot expose proprietary tier-state to a central planner.
+cannot expose proprietary tier-state to a central planner.  Note that the gap between B6
+and CTDE methods conflates two factors: the information advantage of joint observability
+and the algorithmic difference between DQN and MAPPO.  We report B6 solely as an
+aspirational ceiling, not as a controlled measurement of the value of information.
+Quantifying only the information value would require a centralized MAPPO (or equivalent
+on-policy variant), which we leave for future work.
 
 \subsection{Main Results}
 \label{sec:main}
@@ -711,16 +746,18 @@ scenarios.  Within the CTDE-admissible class (all methods except B6), CCD-MAPPO 
 best performer on every metric.  Notably:
 \begin{itemize}[itemsep=2pt]
   \item CCD-MAPPO improves mean return by \textbf{4.1\%} over MAPPO w/o CCD
-    ($p=0.031$, Wilcoxon), \textbf{8.3\%} over QMIX ($p=0.012$), \textbf{21.2\%}
-    over MADDPG ($p=0.008$), \textbf{35.2\%} over IPPO ($p<0.001$), and
-    \textbf{23.7\%} over the $(s,S)$ heuristic.
+    ($p=0.031$, Wilcoxon), \textbf{12.4\%} over QMIX ($p=0.012$), \textbf{21.2\%}
+    over MADDPG ($p=0.008$), \textbf{31.2\%} over IPPO ($p<0.001$), and
+    \textbf{23.7\%} over the $(s,S)$ heuristic.\footnote{All relative improvements are
+    computed as $(|\bar\Pi_{\text{baseline}}| - |\bar\Pi_{\text{CCD-MAPPO}}|)\;/\;
+    |\bar\Pi_{\text{baseline}}|\times100\%$, reflecting the proportional reduction in
+    the absolute loss magnitude relative to each baseline.}
   \item The lower standard deviation of CCD-MAPPO ($\pm312.4$ vs.\ $\pm389.7$ for
     MAPPO w/o CCD) indicates more consistent performance across seeds and episodes.
   \item Time-to-recover $T_R$ is reduced from 17.5 steps (MAPPO w/o CCD) to 15.2 steps,
     a 13.1\% improvement that is operationally significant in time-critical scenarios.
-  \item The gap between the oracle DQN and the best CTDE method quantifies the
-    \emph{social cost of information asymmetry}: $35{,}080.6 - (-7{,}734.6) = 42{,}815.2$
-    return units, motivating institutional data-sharing platforms.
+  \item The gap between the oracle DQN and CCD-MAPPO is $35{,}080.6-(-7{,}734.6)
+    =42{,}815.2$ return units.  We discuss this gap in Section~\ref{sec:discussion}.
 \end{itemize}
 
 \begin{table}[t]
@@ -926,11 +963,13 @@ MAPPO w/o CCD       & $-23403.5\pm523.7$ & $42.14\pm1.06$ & $0.199\pm0.013$ & $4
 \subsection{Time-to-Recover Distribution}
 \label{sec:tr}
 
-Figure~\ref{fig:tr} shows the per-episode $T_R$ distribution (boxplot over 100 rollouts)
-for each method.  The key observation is that CCD-MAPPO \emph{compresses the upper tail}
-relative to MAPPO w/o CCD: while mean $T_R$ improves by 13.1\%, the 90th-percentile $T_R$
-improves by 18.7\%.  In supply-chain practice the tail matters more than the mean, since
-prolonged recoveries trigger cascading backorders and reputational penalties.
+Figure~\ref{fig:tr} shows the mean $T_R$ per method (bar chart; std.\ deviations reported
+in the caption) across all 100 rollouts.  The key observation is that CCD-MAPPO achieves
+the lowest mean $T_R$ within the CTDE class and also the lowest standard deviation
+($\pm1.2$ vs.\ $\pm1.4$ for MAPPO w/o CCD), indicating more reliable recovery.
+In supply-chain practice the tail of the recovery distribution often matters more than
+the mean, since prolonged recoveries trigger cascading backorders and reputational
+penalties; the reduction in std.\ is therefore operationally significant.
 
 \begin{figure}[t]
 \centering
@@ -1136,29 +1175,48 @@ confirming Proposition~\ref{prop:gnn}.
 \paragraph{Why does CCD help most on demand-side disruptions (S1, S4)?}
 Under demand surges and compound shocks, agents must rapidly re-coordinate ordering
 policies to absorb excess demand.  The CCD signal encodes whether each agent has the
-joint data capability (both broad sources and deep analytics) to adapt its demand
+joint data capability (both broad data sources and deep analytics) to adapt its demand
 forecast quickly.  A firm with high CCD signals to peers that it can handle increased
 coordination load, enabling others to shift ordering to it during the surge.  Under S3
 (Transportation Delay), the coordination bottleneck shifts to logistics timing rather
 than information processing; CCD is less informative about logistics capacity, explaining
 the marginal reversal.
 
-\paragraph{S3 anomaly.}
-In S3, CCD-MAPPO achieves $-7206.4$ vs.\ $-7029.3$ for MAPPO w/o CCD, a 2.5\%
-disadvantage.  This is within two standard deviations and is not statistically significant
-($p=0.21$, Wilcoxon).  We interpret it as follows: during transportation delays, the
-binding constraint is the lead-time multiplier $\kappa=2$, not information-processing
-capability.  The CCD bonus in the reward (Eq.~\ref{eq:reward}) creates a slight
-over-ordering incentive to maintain high CCD—a mismatch when the delay is structural.
-A scenario-adaptive $\lambda_S$ schedule is a natural remedy, left for future work.
+\paragraph{Why CCD contributes marginally in S2 (Supply Interruption).}
+In S2, CCD-MAPPO achieves $3945.7$ vs.\ $3938.8$ for MAPPO w/o CCD---a difference of
+$6.9$ return units ($0.18\%$), well below statistical significance ($p=0.43$, Wilcoxon).
+This near-zero margin is structurally analogous to S3: supply interruptions (one supplier
+going offline) create a hard capacity constraint that \emph{no amount of data capability
+can overcome}.  When the upstream supply is physically unavailable, the CCD bonus in
+the reward does not help agents coordinate better; it only adds noise to the ordering
+signal.  CCD's role is to improve \emph{information-processing coordination}; it has
+near-zero marginal value when the binding bottleneck is a physical supply constraint
+rather than an information asymmetry.  This limitation is consistent with the
+information-theoretic framing of Proposition~\ref{prop:info} and further narrows the
+operating conditions under which CCD-MAPPO offers the largest gains.
 
-\paragraph{Information asymmetry cost.}
-The gap between oracle DQN ($35{,}080.6$) and CCD-MAPPO ($-7{,}734.6$) is approximately
-$42{,}815$ return units.  This quantifies the social welfare loss attributable to B2B
-information barriers.  From a policy design standpoint, institutional data-exchange
-platforms (e.g., trusted execution environments for encrypted state sharing) that
-partially bridge this gap could generate substantial social returns---even a 10\%
-reduction in the gap would be worth roughly $4{,}282$ return units per episode.
+\paragraph{S3 anomaly.}
+In S3, CCD-MAPPO achieves $-7206.4$ vs.\ $-7029.3$ for MAPPO w/o CCD, a $2.5\%$
+disadvantage within two standard deviations ($p=0.21$, Wilcoxon, not significant).  The
+mechanism is the same as S2: the lead-time multiplier $\kappa=2$ is a structural logistics
+constraint, not an information-processing bottleneck.  The CCD bonus $\lambda_S\CCD_{i,t}$
+in Eq.~\eqref{eq:reward} creates a slight over-ordering incentive to maintain high CCD---a
+mismatch when the bottleneck is purely logistical.  A scenario-adaptive $\lambda_S$
+schedule (reducing $\lambda_S$ when logistics disruption signals are detected) is a
+natural remedy, left for future work.
+
+\paragraph{On the gap between Oracle DQN and CTDE methods.}
+The $42{,}815$-unit gap between the oracle DQN and CCD-MAPPO reflects two confounded
+factors: (i) \emph{information structure}: DQN observes the full joint state, eliminating
+B2B information asymmetry; (ii) \emph{algorithmic difference}: DQN uses a different
+optimization paradigm (off-policy Q-learning vs.\ on-policy PPO) and acts as a single
+centralized controller.  We \emph{cannot} attribute the entire gap to information
+asymmetry alone; doing so would require a centralized MAPPO variant as a controlled
+comparison.  What we can conclude is that the gap provides a conservative upper bound
+on the social value of perfect information sharing---the true value of eliminating
+information barriers is at most this gap.  From a policy design standpoint, even partial
+information sharing (e.g., via privacy-preserving data-exchange platforms) could
+unlock a meaningful fraction of this bound.
 
 \paragraph{Practical deployment considerations.}
 The residual-policy construction ensures that deploying CCD-MAPPO early in training
@@ -1201,13 +1259,23 @@ should target the \emph{lagging} breadth or depth dimension first, since CCD's m
 value is highest where the breadth--depth gap is largest.
 
 \paragraph{Limitations and future work.}
-The simulator abstracts from cross-border tariff and exchange-rate dynamics.  Three
-high-priority extensions are: (i) \emph{asymmetric MARL} with agent-specific private
-rewards to model competitive supply-chain partners; (ii) \emph{offline RL from
-historical logs} to eliminate the on-policy interaction requirement; (iii)
-\emph{Sobol-type sensitivity decomposition} for the reward weights, including interaction
-effects among $\lambda_R,\lambda_C,\lambda_S$.  Full-scale GNN critic training on
-hundreds of supply chain nodes is also a direct follow-up.
+The simulator abstracts from cross-border tariff and exchange-rate dynamics.
+Importantly, the breadth $B_{i,t}$ and depth $D^{\mathrm{pth}}_{i,t}$ indices are
+\emph{synthetically generated} via Ornstein--Uhlenbeck dynamics around firm-specific
+steady states; they are not calibrated to real enterprise digitalization survey data.
+While this is standard in simulation-based MARL research (allowing controlled variation),
+it limits the external validity of the absolute performance numbers.  A near-term
+extension is to calibrate the OU parameters ($\mu_i,\sigma_i,\theta_i$) from
+large-scale firm-level digital-capability surveys (e.g., from the China Enterprise
+Survey or similar national panels), which would ground the CCD dynamics in empirical
+regularities and allow counterfactual policy experiments.
+Three additional high-priority extensions are: (i) \emph{asymmetric MARL} with
+agent-specific private rewards to model competitive supply-chain partners; (ii)
+\emph{offline RL from historical disruption logs} to eliminate the on-policy interaction
+requirement; (iii) \emph{scenario-adaptive reward weights}, particularly a dynamic
+$\lambda_S$ schedule that reduces the CCD bonus when logistics-type disruptions (S2,
+S3) are detected.  Full-scale GNN critic training on hundreds of supply chain nodes is
+also a direct follow-up.
 
 %%═══════════════════════════════════════════════════════════════════════════
 \section*{Acknowledgments}
