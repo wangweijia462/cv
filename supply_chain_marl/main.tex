@@ -94,7 +94,7 @@ best mean return of $-7734.6\pm312.4$ within the CTDE-admissible class (4.1\% ov
 vanilla MAPPO, 8.3\% over QMIX, and 23.7\% over the heuristic), confirmed significant
 at $p<0.05$ by Wilcoxon rank-sum tests.  Extended ablation confirms CCD is
 non-redundant with its components, and reward-weight sensitivity analysis shows the
-comparative ordering is preserved across a two-octave parameter sweep.
+comparative ordering is stable under a two-octave parameter sweep.
 
 \medskip\noindent
 \textbf{Keywords:} Multi-agent reinforcement learning; supply chain resilience;
@@ -384,8 +384,10 @@ $C\cdot T = \tfrac{2\sqrt{BD}}{B+D}\cdot\tfrac{B+D}{2}=\sqrt{BD}$; hence
 $\partial(C\cdot T)/\partial B = \tfrac{\sqrt{D}}{2\sqrt{B}}>0$, and since $\CCD=\sqrt{C\cdot T}$
 is strictly increasing in $C\cdot T$, we obtain $\partial\CCD/\partial B>0$.  (iii) By AM-GM, $2\sqrt{BD}\le B+D$ with equality iff
 $B=D$; hence $C\le1$ with $C=1$ iff $B=D$, and $T=\mu$ is fixed, so $\CCD\le\sqrt{\mu}$
-with equality iff $B=D$.  (iv) The cross-partial $\partial^2\CCD/\partial B\partial D\ne0$
-for generic $(B,D)$, ruling out additively separable decompositions.
+with equality iff $B=D$.  (iv) If $\CCD(B,D)=f(B)+g(D)$ for some univariate functions $f,g$, then
+$\partial^2\CCD/\partial B\partial D\equiv0$ everywhere.  But direct computation gives
+$\partial^2\CCD/\partial B\partial D = \tfrac{1}{16}(BD)^{-3/4}>0$ for all $B,D>0$,
+a contradiction.  Hence no additively separable decomposition exists.
 \end{proof}
 
 \subsection{Representational Efficiency of CCD as a State Feature}
@@ -442,8 +444,8 @@ Then:
 satisfy $B_1+D_1=B_2+D_2$, so $h$ assigns identical values: $\alpha(B_1+D_1)=\alpha(B_2+D_2)$.
 Hence $h$ is representationally insufficient for $\pi^*$.  Asymmetric or nonlinear
 additive features may distinguish the pairs, but require the agent to recover the
-balance non-linearity from data, incurring higher sample complexity---which is precisely
-what explicit CCD pre-computation avoids.
+balance non-linearity from data rather than receiving it pre-computed---which is
+precisely the representational shortcut that explicit CCD embedding provides.
 
 (ii) We do not claim uniqueness over the entire class $\mathcal{F}$; the geometric mean
 $g(B,D)=\sqrt{BD}$ satisfies all four Lemma~\ref{lem:ccd} properties and is a monotone
@@ -483,8 +485,8 @@ R_{i,t} =
 \end{equation}
 where $\lambda_R,\lambda_C,\lambda_S>0$ are reward weights (Table~\ref{tab:hyper}).  The
 $\CCD$ bonus creates an intrinsic incentive for agents to maintain balanced data-utilization
-capability, operationalizing the empirical finding that structural capability drives
-resilience more than aggregate capability level.
+capability; the intrinsic incentive encodes the empirical finding that structural
+capability balance drives resilience more than aggregate capability level alone.
 
 \subsection{MAPPO with Residual-Policy Construction}
 \label{sec:mappo}
@@ -1235,7 +1237,7 @@ confirming Proposition~\ref{prop:gnn}.
 \label{sec:discussion}
 
 The scenario-level results reveal a consistent pattern: CCD-MAPPO's advantage
-concentrates on demand-side disruptions (S1: 10.1\%; S4: 4.0\%) but nearly vanishes
+concentrates on demand-side disruptions (S1: 10.1\%; S4: 3.9\%) but nearly vanishes
 under physical supply constraints (S2: $0.18\%$, $p=0.43$; S3: $-2.5\%$, $p=0.21$, both
 non-significant by Wilcoxon).  This asymmetry reflects what CCD encodes.  Under demand
 surges, agents need to re-coordinate ordering policies rapidly; CCD tells each agent
