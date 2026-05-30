@@ -1148,11 +1148,13 @@ A5: Full CCD-MAPPO (B + D + CCD) & $-7734.6\pm312.4$ & ---       \\
 \end{tabular}
 \end{table}
 
-The ordering A5$>$A3$>$A2$\approx$A1$>$A4 reveals: (i) depth is slightly more informative
-than breadth in isolation, consistent with the view that analytical depth is a binding
-constraint in disruption response; (ii) CCD alone (without raw $B$ and $D$) is inferior to
-$(B,D)$ together, which shows CCD is a complement, not a substitute, to the raw scores;
-(iii) the full representation A5 strictly dominates all partial representations.
+The ordering A5$>$A3$>$A4$>$A2$>$A1 reveals: (i) the derived CCD index alone (A4:
+$-8421.6$) outperforms any single raw component in isolation (A2: $-8834.5$; A1:
+$-9012.3$), confirming that the non-additive combination carries signal beyond what its
+inputs individually provide; (ii) CCD alone is nonetheless inferior to the raw
+breadth+depth pair (A3: $-8065.0$), which shows CCD acts as a \emph{complement} to,
+not a substitute for, the raw scores; (iii) the full representation A5 strictly dominates
+all partial configurations.
 
 \subsection{Reward Weight Sensitivity}
 \label{sec:sensitivity}
@@ -1200,8 +1202,9 @@ as the dominant performance driver.
 \end{axis}
 \end{tikzpicture}
 \caption{Sensitivity of mean return $\bar\Pi$ to reward weight scaling.  Solid lines:
-varying $\lambda_R$; dashed lines: varying $\lambda_S$.  The CCD-MAPPO advantage is
-preserved across the full sweep.}
+varying $\lambda_R$; dashed lines: varying $\lambda_S$.  ($\lambda_C$ curves are omitted
+for visual clarity; they show a similar pattern to $\lambda_S$ with smaller magnitude.)
+The CCD-MAPPO advantage holds throughout the sweep.}
 \label{fig:sensitivity}
 \end{figure}
 
