@@ -21,7 +21,15 @@
 \usepackage{geometry}
 \geometry{margin=2.5cm}
 \usepackage{setspace}
-\onehalfspacing
+\doublespacing
+\usepackage{lineno}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\small CCD-MAPPO: Supply Chain Resilience via Coupling Coordination}
+\lhead{\small Weijia Wang}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage[numbers,sort&compress]{natbib}
@@ -66,7 +74,19 @@
 
 %%═══════════════════════════════════════════════════════════════════════════
 \begin{document}
+\linenumbers
 \maketitle
+
+%%─── Highlights ────────────────────────────────────────────────────────────
+\noindent\textbf{Highlights}
+\begin{itemize}[leftmargin=2em,itemsep=1pt]
+  \item CCD index embedded in MARL state space formalizes data-capability breadth--depth trade-off
+  \item Residual policy construction guarantees worst-case performance bounded by the $(s,S)$ heuristic
+  \item Linear-scaling GNN critic reduces parameter complexity from $O(|\mathcal{N}|^2)$ to $O(|\mathcal{E}|)$
+  \item 12.4\% improvement over QMIX across four disruption scenarios, confirmed by Wilcoxon tests
+  \item Controlled ablation isolates the balance dimension's marginal contribution beyond raw score aggregates
+\end{itemize}
+\bigskip
 
 %% ── abstract ──────────────────────────────────────────────────────────────
 \begin{abstract}
@@ -187,58 +207,150 @@ Section~\ref{sec:conclusion} concludes with managerial and policy implications.
 
 \subsection{Supply Chain Resilience Measurement}
 
-\citet{bruneau2003framework} define resilience through the four R's---Robustness,
-Redundancy, Resourcefulness, and Rapidity---operationalized via a normalized service-level
-trajectory $F(t)\in[0,1]$.  \citet{christopher2004building} distinguish \emph{resistance}
-from \emph{recovery}, and \citet{hosseini2019review} survey quantitative indicators including
-the loss area $\int(1-F(t))\,dt$, the time-to-recover $T_R$, and the minimum service level
-$F_{\min}$, which we adopt as evaluation metrics.  \citet{ivanov2020viable} introduces the
-Viable Supply Chain model that accounts for survivability under long-duration shocks,
-motivating our compound-shock scenario.  \citet{dolgui2021ripple} study ripple cascades
-in supply networks; their analysis of how local failures spread chain-wide informs our
-choice of bullwhip penalty in the reward function.
+Quantifying supply chain resilience requires bridging two traditions that have historically
+proceeded in parallel: normative frameworks that define what resilience means, and
+operational metrics that measure it.  \citet{bruneau2003framework} establish the canonical
+four-R taxonomy---Robustness, Redundancy, Resourcefulness, and Rapidity---operationalized
+through a normalized service-level trajectory $F(t)\in[0,1]$.  This framework distinguishes
+performance degradation from recovery speed, a distinction that matters for multi-tier
+networks because the two phases have different managerial levers.
+\citet{christopher2004building} sharpen this by separating \emph{resistance} (avoiding
+performance loss before disruption) from \emph{recovery} (restoring performance after), and
+argue that organizational agility---the ability to respond quickly to unanticipated
+changes---is the critical determinant of the recovery phase.
+
+The operationalization of these concepts for quantitative analysis has been surveyed
+comprehensively by \citet{hosseini2019review}, who identify three metrics with the broadest
+empirical and analytical support: the cumulative resilience loss $\mathcal{L}=\int(1-F(t))\,dt$,
+the time-to-recover $T_R$, and the minimum service level $F_{\min}$.  A key finding of
+that survey is that no single metric captures both the depth and duration of a disruption;
+using $\mathcal{L}$ and $T_R$ jointly provides a more complete picture than either alone.
+We adopt both in our evaluation.
+
+\citet{sheffi2005resilient} argues from an industry perspective that resilience is built
+before disruptions occur through investments in flexibility---supplier diversification,
+cross-trained workforces, and modular process design.  This pre-disruption investment view
+is consistent with our treatment of data-capability indices ($B$ and $D$) as time-varying
+states that reflect ongoing firm-level investments rather than fixed parameters.
+\citet{ivanov2020viable} extends this to long-duration shocks through the Viable Supply
+Chain model, which requires survivability (continuing to operate under persistent stress)
+in addition to recoverability---motivating our compound-shock scenario S4.
+\citet{dolgui2021ripple} study how local disruptions cascade into chain-wide failures
+through the ripple effect; their analysis informs our bullwhip penalty, which discourages
+order-quantity amplification that would propagate local shocks upward.
+
+Despite this wealth of frameworks, a structural gap remains: existing measurement
+approaches treat resilience as an observable outcome to be estimated ex post, but do not
+prescribe how ordering policies should be adapted in real time under partial observability.
+Converting resilience metrics into a reward signal that agents can optimize---while
+respecting the B2B privacy constraints that prevent full state sharing---is the optimization
+problem this paper addresses.
 
 \subsection{Multi-Agent Reinforcement Learning}
 
-\citet{lowe2017multi} introduce MADDPG, which extends DDPG to mixed cooperative-competitive
-settings via centralized critics conditioned on joint actions.
-\citet{rashid2018qmix} propose QMIX, a value-decomposition method that factorizes the joint
-action-value function through a monotone mixing network, achieving strong performance on
-cooperative benchmarks.  \citet{papoudakis2021benchmarking} benchmark Independent PPO
-(IPPO)---a fully decentralized PPO variant with no shared critic---and demonstrate that
-it remains a competitive baseline in cooperative tasks despite its simplicity.
-\citet{yu2022surprising} show that MAPPO, which uses a centralized critic trained on the
-joint state, achieves state-of-the-art performance with greater sample efficiency than
-MADDPG in cooperative tasks.  We use all four as baselines (Section~\ref{sec:baselines}).
+\subsubsection*{Foundations: from single-agent DRL to cooperative MARL}
 
-\citet{oroojlooyjadid2022deep} apply a deep Q-network to the Beer Distribution Game,
-establishing the first DRL benchmark for multi-tier inventory management.
-\citet{zhang2020multi} demonstrate cooperative scheduling gains through MARL in
-computer-integrated manufacturing.  \citet{holler2019deep} use multi-agent DRL for
-multi-driver vehicle dispatching, showing that CTDE outperforms independent learners in
-congestion-prone environments analogous to supply bottlenecks.  Our work extends this line
-by incorporating structural data-capability indices into the state and reward, a dimension
-none of the above studies addresses.
+Single-agent deep reinforcement learning was placed on firm empirical ground by
+\citet{mnih2015human}, who showed that a deep Q-network can achieve human-level performance
+on complex sequential tasks by approximating $Q$-values with convolutional neural networks.
+The policy-gradient perspective was advanced by \citet{schulman2016high}, who introduced
+Generalized Advantage Estimation to reduce the variance of policy gradient estimates, and
+by \citet{schulman2017proximal}, whose Proximal Policy Optimization algorithm constrains
+each gradient step through a clipped surrogate objective, enabling stable learning in
+high-dimensional continuous action spaces.  These single-agent foundations underpin our
+choice of PPO-based MAPPO as the backbone algorithm.
 
-Recent work has investigated feature engineering for MARL state spaces
-\citep{velic2018graph,hamilton2017inductive} and safe policy learning via constrained
-optimization \citep{schulman2017proximal}.  Our residual-policy construction is related to
-residual RL \citep{silver2018residual} where a learned policy refines a base controller;
-we adapt this to the multi-agent CTDE setting and prove the safety guarantee formally.
+Extending single-agent RL to multiple interacting agents introduces the non-stationarity
+problem: from any single agent's perspective, the environment appears non-stationary because
+the policies of other agents change throughout training.  The Centralized Training with
+Decentralized Execution (CTDE) paradigm resolves this by allowing agents to share information
+during training while acting independently at deployment.  \citet{lowe2017multi} introduce
+MADDPG, the first CTDE actor-critic architecture, with centralized critics conditioned on
+joint observations and actions.  \citet{rashid2018qmix} propose QMIX, a value-decomposition
+approach that factorizes the joint $Q$-function through a monotone mixing network, achieving
+strong performance on cooperative benchmarks while preserving decentralized execution.
+\citet{papoudakis2021benchmarking} conduct a large-scale benchmark and demonstrate that
+Independent PPO (IPPO), despite using no shared information at all, remains a surprisingly
+competitive baseline---raising the bar for what CTDE methods must demonstrate to justify
+their coordination overhead.  \citet{yu2022surprising} show that MAPPO, equipped with a
+centralized critic trained on the joint state, achieves state-of-the-art sample efficiency
+among cooperative CTDE methods.
+
+\subsubsection*{MARL in supply chain and logistics}
+
+\citet{oroojlooyjadid2022deep} establish the first DRL benchmark for multi-tier inventory
+optimization through a deep Q-network applied to the Beer Distribution Game, demonstrating
+that learned policies can outperform the order-up-to heuristic under demand uncertainty.
+\citet{zhang2020multi} demonstrate MARL-based cooperative scheduling gains in
+computer-integrated manufacturing, where agents coordinate machine assignments to minimize
+makespan.  \citet{holler2019deep} apply multi-agent DRL to vehicle dispatching and
+repositioning, finding that CTDE consistently outperforms independent learners in
+congestion-prone settings---an analogy for the order-amplification bottlenecks in supply
+chains.  None of these works incorporates structural data-capability heterogeneity (breadth
+vs.\ depth of data use) into the state or reward, which is the gap our framework addresses.
+
+\subsubsection*{Graph-structured critics and safe policy learning}
+
+The supply chain network is naturally a graph, motivating graph-neural-network (GNN)
+representations for the centralized value function.  \citet{hamilton2017inductive}
+introduce GraphSAGE, which generates inductive node embeddings by aggregating neighbor
+features, enabling generalization to unseen graph topologies.  \citet{velic2018graph}
+extend this with Graph Attention Networks, which learn importance weights for each
+neighbor via multi-head attention, providing a principled mechanism for selective
+information aggregation.  We build our scalable GNN critic on these foundations,
+replacing the quadratic fully-connected value head with a message-passing architecture
+that achieves $O(|\mathcal{E}|)$ parameter complexity.
+
+For safe policy learning, \citet{silver2018residual} propose residual RL, in which a
+learned policy adds a correction term to an existing controller, guaranteeing that the
+combined policy cannot be worse than the base controller at initialization.  We adapt
+this idea to the multi-agent CTDE setting, extend it with a formal deviation bound
+that holds at every training stage (not only at initialization), and prove that the
+construction preserves B2B information privacy at execution time---properties not
+established in the original residual-RL framework.
 
 \subsection{Coupling Coordination Degree Theory}
 
-Coupling-coordination analysis, originating in synergetics and adapted to economic systems
-by \citet{liao1999quantitative}, measures the synergy between two interacting subsystems.
-The coupling degree $C(B,D) = 2\sqrt{BD}/(B+D)$ captures how balanced the two subsystems
-are (analogous to the harmonic-to-arithmetic mean ratio), while the synergy index
-$T = \alpha B + \beta D$ captures the joint level.  Their product $\CCD = \sqrt{C\cdot T}$
-combines balance and magnitude into a single index.  CCD has been applied to
-environment--economy coordination \citep{liao1999quantitative}, regional development, and
-energy-economy coupling, but has not previously been embedded into an RL state space.  We
-provide the first representational-efficiency argument for embedding CCD directly in the
-state---additive functions $\alpha B+\beta D$ cannot capture the balance non-linearity that
-CCD encodes (Proposition~1)---and a controlled ablation that tests this claim empirically.
+Coupling coordination analysis, adapted to social science by \citet{liao1999quantitative},
+provides a compact scalar measure for the synergy between two interacting subsystems.  The
+framework decomposes the relationship between two variables $B$ and $D$ into two orthogonal
+components.  The \emph{coupling degree}
+\[
+  C(B,D) = \frac{2\sqrt{BD}}{B+D}
+\]
+equals the ratio of the harmonic mean to the arithmetic mean---a quantity that equals 1
+when $B=D$ and decreases monotonically as the ratio $B/D$ departs from unity.  It thus
+captures structural \emph{balance} between the two subsystems, irrespective of their
+absolute levels.  The \emph{synergy index}
+\[
+  T = \alpha B + \beta D, \quad \alpha + \beta = 1,
+\]
+is a weighted linear combination that captures the joint \emph{level}.  The Coupling
+Coordination Degree $\CCD = \sqrt{C \cdot T}$ combines both dimensions into a single
+scalar: it is high when the two subsystems are simultaneously well-balanced and
+high-performing, and low when either dimension is deficient.
+
+This formulation was developed in the context of environment--economy coordination
+\citep{liao1999quantitative} and has since been applied to regional development planning,
+energy-economy coupling assessment, and urban sustainability index construction.  A key
+property that makes CCD preferable to simpler aggregates such as $\sqrt{BD}$ (geometric
+mean) is its \emph{explicit factorization}: $C$ and $T$ are separately interpretable as a
+balance score and a level score, respectively, allowing analysts to diagnose the source of
+low coordination---whether it arises from a breadth--depth mismatch (low $C$) or from
+insufficient capability overall (low $T$).  This diagnostic property is valuable in
+policy contexts where targeted interventions require knowing \emph{which} dimension to
+address.
+
+Despite CCD's widespread use in economic and geographic measurement, its potential as a
+state feature for reinforcement learning agents has not been explored.  Prior MARL supply
+chain work treats firm-level capability as a scalar or omits it entirely; the structural
+composition of that capability---how breadth and depth combine---has not been incorporated
+into either the state representation or the reward signal.  We provide the first
+representational-efficiency argument for why CCD belongs in the state directly (rather
+than being derived from separate $B$ and $D$ observations by the agent's neural network):
+symmetric linear features $\alpha B + \beta D$ cannot recover the balance non-linearity
+that CCD encodes, a claim formalized in Proposition~1 and confirmed empirically by
+controlled ablation.
 
 %%═══════════════════════════════════════════════════════════════════════════
 \section{Theoretical Framework}
@@ -815,8 +927,8 @@ this cooperative setting.
   xmin=0, xmax=200,
   ymin=-45000, ymax=40000,
   grid=major, grid style={dashed,gray!40},
-  legend pos=south east,
-  legend style={font=\small,fill=white,draw=gray!60},
+  legend style={at={(0.5,-0.18)},anchor=north,legend columns=3,
+    font=\small,fill=white,draw=gray!60},
   title={Learning Curves: Mixed-Scenario Training (5 seeds)},
   every axis plot/.append style={thick}]
 
@@ -1059,8 +1171,7 @@ quantifying the cost of information asymmetry.
   ylabel={Mean Operating Return $\bar\Pi$},
   xmin=0, xmax=45, ymin=-30000, ymax=45000,
   grid=major, grid style={dashed,gray!40},
-  legend pos=north east,
-  legend style={font=\small},
+  legend style={at={(1.02,1)},anchor=north west,font=\small},
   title={Pareto Frontier: $\bar\Pi$ vs.\ $\mathcal{L}$ (per method $\times$ scenario)}]
 
 \addplot[only marks,mark=o,color=gray!70,mark size=4pt] coordinates {
@@ -1159,8 +1270,7 @@ as the dominant performance driver.
   xtick={0.25,0.5,1,2,4},
   xticklabels={$\times0.25$,$\times0.5$,$\times1$,$\times2$,$\times4$},
   grid=major, grid style={dashed,gray!40},
-  legend pos=south west,
-  legend style={font=\small},
+  legend style={at={(0.5,-0.18)},anchor=north,legend columns=2,font=\small},
   xmode=log, log basis x=2,
   title={Sensitivity to Reward Weight Scaling}]
 
