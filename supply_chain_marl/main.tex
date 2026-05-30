@@ -170,14 +170,12 @@ augmented by a data-element Coupling Coordination Degree signal.  Our contributi
   deviation from it is bounded at all times (Proposition~2), enabling deployment without
   risk of catastrophic early-training failures.
 
-\item \textbf{Scalable GNN critic.}  We derive and validate a graph-neural-network
-  formulation of the centralized critic that reduces parameter complexity from quadratic
-  to linear in the number of supply chain nodes (Proposition~3).
-
-\item \textbf{Comprehensive empirical evaluation.}  We compare CCD-MAPPO against five
-  baselines---$(s,S)$, IPPO, MADDPG, QMIX, and centralized oracle DQN---over four
-  disruption scenarios and five random seeds, with Wilcoxon significance tests and a
-  full ablation study.
+\item \textbf{Scalable GNN critic and empirical evaluation.}  A graph-neural-network
+  formulation reduces critic parameter complexity from quadratic to linear
+  (Proposition~3), validated by zero-shot transfer to 21-agent networks.  The full
+  evaluation spans five baselines---$(s,S)$, IPPO, MADDPG, QMIX, oracle DQN---four
+  disruption scenarios, and five random seeds, with Wilcoxon significance tests and a
+  five-component ablation study.
 \end{enumerate}
 
 The remainder of this paper is organized as follows.
@@ -425,12 +423,13 @@ Then:
     uniquely combines a \emph{balance measure} ($C$, the ratio of harmonic to arithmetic
     mean) with a \emph{level measure} ($T$, the linear aggregate).  Alternative
     non-additive scalars in $\mathcal{F}$---for example, the geometric mean
-    $\sqrt{BD}$---capture balance but lack the level-sensitivity property: $\sqrt{BD}$
-    is invariant to uniform scaling of both $B$ and $D$, so it cannot distinguish a
-    high-capability balanced firm from a low-capability balanced firm.  $\CCD$ avoids
-    this deficiency because $T$ encodes the level, making $\CCD$ representationally
-    superior to alternatives in $\mathcal{F}$ under \emph{heterogeneous} capability
-    endowments.
+    $\sqrt{BD}$---are monotone transforms of $\CCD$ under the symmetric setting
+    ($\alpha=\beta=\tfrac{1}{2}$) and therefore provide equivalent ordering power.
+    The canonical advantage of $\CCD$ lies in its \emph{explicit factorization}:
+    $C\in[0,1]$ gives a normalized balance score and $T$ gives the absolute capability
+    level, furnishing two directly interpretable diagnostics that practitioners can
+    monitor and optimize separately---a property absent in any single-term expression
+    such as $\sqrt{BD}$.
   \item \emph{(Empirically grounded)} Under Condition (A2), verified in
     Section~\ref{sec:ablation} by the degradation observed when CCD is masked, including
     CCD explicitly reduces the mean return gap vs.\ the full model by 4.1\% relative to
@@ -446,17 +445,16 @@ additive features may distinguish the pairs, but require the agent to recover th
 balance non-linearity from data, incurring higher sample complexity---which is precisely
 what explicit CCD pre-computation avoids.
 
-(ii) We do not claim uniqueness over the entire class $\mathcal{F}$; many functions in
-$\mathcal{F}$ are non-additive and balance-sensitive.  The claim is that CCD is
-\emph{canonically superior} among practically meaningful candidates because it separates
-the balance and level dimensions into two interpretable sub-components ($C$ and $T$).
-Formally, the geometric mean $g(B,D)=\sqrt{BD}$ satisfies all four Lemma~\ref{lem:ccd}
-properties but is scale-equivariant: $g(\lambda B,\lambda D)=\lambda g(B,D)$ for all
-$\lambda>0$, so it cannot distinguish $(B,D)=(0.2,0.2)$ from $(0.8,0.8)$ relative to a
-fixed threshold.  By contrast, $\CCD(0.2,0.2)=0.2$ while $\CCD(0.8,0.8)=0.8$, because
-$T=\frac12(B+D)$ encodes the level.  This level-sensitivity is essential in supply chains
-where high-capability firms ($B\approx D\approx1$) can absorb larger coordination loads
-than low-capability ones ($B\approx D\approx0.2$), even at the same balance ratio.
+(ii) We do not claim uniqueness over the entire class $\mathcal{F}$; the geometric mean
+$g(B,D)=\sqrt{BD}$ satisfies all four Lemma~\ref{lem:ccd} properties and is a monotone
+transformation of $\CCD$ when $\alpha=\beta=\tfrac{1}{2}$ (since $\CCD=(BD)^{1/4}$ in
+that symmetric case), so the two functions have identical ordering power.  The canonical
+advantage of $\CCD$ is its \emph{explicit decomposition}: $C(B,D)=2\sqrt{BD}/(B+D)\in[0,1]$
+isolates the balance dimension and $T(B,D)=\tfrac12(B+D)$ isolates the level; an analyst
+can directly read off \emph{why} coordination is poor (low $C$: breadth--depth mismatch;
+or low $T$: insufficient capability overall) and target interventions accordingly.  No
+single-term expression $h(B,D)$ supports this diagnostic separation, which is why $\CCD$
+is the canonical member of the coupling-coordination family for policy-facing applications.
 
 (iii) This is the empirical result reported in Table~\ref{tab:ablation} (A3 vs.\ A5).
 \end{proof}
@@ -517,10 +515,12 @@ Under the residual policy~\eqref{eq:residual}:
   \item \textbf{Bounded deviation}: For all $t$ and all $\tilde{a}_{i,t}\in[0,1]$,
     $|a_{i,t}-a^{\mathrm{ss}}_{i,t}|\le\rho_{\mathrm{res}}$, so the learned policy can
     deviate from the heuristic by at most $\rho_{\mathrm{res}}$ action units.
-  \item \textbf{Cost-monotone early stopping}: If training is halted at any iteration
-    $k$ for which the learned deviation has not been fully exploited
-    ($\E[\tilde{a}_{i,t}]\approx0.5$), the expected cost is no worse than the
-    $(s,S)$ baseline.
+  \item \textbf{Worst-case bound}: For any partially trained policy with arbitrary
+    $\tilde{a}_{i,t}\in[0,1]$, the executed action satisfies
+    $a_{i,t}\in[a^{\mathrm{ss}}_{i,t}-\rho_{\mathrm{res}},\;
+    a^{\mathrm{ss}}_{i,t}+\rho_{\mathrm{res}}]\cap[0,1]$,
+    bounding the deviation from the heuristic at \emph{every} training stage, not
+    only at initialization.
 \end{enumerate}
 \end{proposition}
 
@@ -530,8 +530,11 @@ $\E[\tilde{a}_{i,t}]=0.5$ and negligible variance, giving
 $\rho_{\mathrm{res}}(2\cdot0.5-1)=0$.  (ii) Deviation: for any $\tilde{a}\in[0,1]$,
 $(2\tilde{a}-1)\in[-1,1]$, so the additive deviation $\rho_{\mathrm{res}}(2\tilde{a}-1)$
 has magnitude at most $\rho_{\mathrm{res}}$; the outer clip preserves feasibility.
-(iii) Follows from (i): at early stopping the actor contributes near-zero deviation, so
-the policy is approximately $a^{\mathrm{ss}}$ with cost equal to the heuristic's.
+(iii) Follows from (ii): for any $\tilde{a}\in[0,1]$, $(2\tilde{a}-1)\in[-1,1]$, so the
+additive deviation $\rho_{\mathrm{res}}(2\tilde{a}-1)$ has magnitude at most
+$\rho_{\mathrm{res}}$ regardless of $k$; the outer clip further enforces $[0,1]$
+feasibility.  At $k=0$ the bound reduces to zero (Proposition~(i)), and it remains
+$\rho_{\mathrm{res}}$ throughout training.
 \end{proof}
 
 \begin{figure}[t]
@@ -710,6 +713,9 @@ the disruption space:
   \item \textbf{S3 (Transportation Delay)}: lead-time multiplier $\kappa=2$ for all
     tiers for 50 steps from $t=80$.
   \item \textbf{S4 (Compound Shock)}: simultaneous combination of S1, S2, and S3.
+    Note that S4 is an in-distribution combination: all three constituent shocks appear
+    individually during mixed-scenario training, so S4 tests response to their
+    simultaneous onset rather than zero-shot generalization to a novel regime.
 \end{itemize}
 
 \paragraph{Evaluation metrics.}
@@ -885,8 +891,10 @@ this cooperative setting.
 \end{axis}
 \end{tikzpicture}
 \caption{Learning curves on mixed scenarios (rolling window of 10 iterations).  Shaded
-bands show 95\% confidence intervals over 5 seeds.  CCD-MAPPO converges fastest and to
-the highest asymptote within the CTDE class.}
+bands show 95\% confidence intervals over 5 seeds.  Curve coordinates are derived from
+evaluation checkpoints at 20-iteration intervals; intermediate values use linear
+interpolation consistent with the observed convergence profile.  CCD-MAPPO converges
+fastest and to the highest asymptote within the CTDE class.}
 \label{fig:learning}
 \end{figure}
 
@@ -1150,7 +1158,7 @@ $(B,D)$ together, which shows CCD is a complement, not a substitute, to the raw 
 Figure~\ref{fig:sensitivity} shows how mean return varies as each reward weight
 ($\lambda_R,\lambda_C,\lambda_S$) is independently scaled by factors in
 $\{0.25, 0.5, 1.0, 2.0, 4.0\}$.  The qualitative ordering
-CCD-MAPPO $>$ MAPPO w/o CCD $>$ QMIX $>$ $(s,S)$ is preserved across all 15 cells.
+CCD-MAPPO $>$ MAPPO w/o CCD $>$ QMIX $>$ $(s,S)$ holds in all 15 cells.
 Absolute returns shift, but the comparative advantage of CCD-MAPPO is robust.  The
 largest sensitivity is to $\lambda_R$ (resilience weight), consistent with its role
 as the dominant performance driver.
@@ -1226,31 +1234,23 @@ confirming Proposition~\ref{prop:gnn}.
 \subsection{Discussion}
 \label{sec:discussion}
 
-\paragraph{Why does CCD help most on demand-side disruptions (S1, S4)?}
-Under demand surges and compound shocks, agents must rapidly re-coordinate ordering
-policies to absorb excess demand.  The CCD signal encodes whether each agent has the
-joint data capability (both broad data sources and deep analytics) to adapt its demand
-forecast quickly.  A firm with high CCD signals to peers that it can handle increased
-coordination load, enabling others to shift ordering to it during the surge.  Under S3
-(Transportation Delay), the coordination bottleneck shifts to logistics timing rather
-than information processing; CCD is less informative about logistics capacity, explaining
-the marginal reversal.
-
-\paragraph{Bounded gains in S2 and S3: physical constraints versus information bottlenecks.}
-Two results we had not fully anticipated require explanation.  In S2 (Supply Interruption),
-CCD-MAPPO achieves $-3945.7$ vs.\ $-3938.8$ for MAPPO w/o CCD---a difference of $6.9$
-return units ($0.18\%$, $p=0.43$, Wilcoxon, not significant).  In S3 (Transportation Delay),
-CCD-MAPPO is actually $2.5\%$ \emph{worse}: $-7206.4$ vs.\ $-7029.3$ ($p=0.21$, not
-significant).  The shared explanation is that CCD encodes \emph{information-processing}
-coordination; when the binding bottleneck is instead a \emph{physical} constraint---a
-supplier that has gone offline, or a lead-time multiplier $\kappa=2$ baked into the
-logistics layer---additional coordination signal cannot substitute for missing capacity.
-In S3, the CCD bonus $\lambda_S\CCD_{i,t}$ in Eq.~\eqref{eq:reward} creates a slight
-over-ordering incentive that is actively harmful when the bottleneck is logistical rather
-than informational.  A scenario-adaptive $\lambda_S$ schedule that attenuates the CCD
-weight when logistics disruption signals are detected is a natural remedy, which we leave
-for future work; the key practical takeaway is that CCD-MAPPO's advantage is largest
-precisely when information asymmetry---not physical capacity---is the limiting factor.
+The scenario-level results reveal a consistent pattern: CCD-MAPPO's advantage
+concentrates on demand-side disruptions (S1: 10.1\%; S4: 4.0\%) but nearly vanishes
+under physical supply constraints (S2: $0.18\%$, $p=0.43$; S3: $-2.5\%$, $p=0.21$, both
+non-significant by Wilcoxon).  This asymmetry reflects what CCD encodes.  Under demand
+surges, agents need to re-coordinate ordering policies rapidly; CCD tells each agent
+whether its peer can absorb extra coordination load (high $C$) and has sufficient
+capability to expand throughput (high $T$)---precisely the signal that enables the
+observed load-shifting behaviour.  The S2 and S3 results, two outcomes we had not
+fully anticipated, expose the method's boundary conditions: when the binding bottleneck
+is a \emph{physical} constraint---a supplier offline, a logistics lead-time multiplier
+fixed at $\kappa=2$---no amount of coordination signal helps because the missing
+capacity is not recoverable through information.  In S3, the CCD bonus
+$\lambda_S\CCD_{i,t}$ in Eq.~\eqref{eq:reward} actively worsens performance by
+creating an over-ordering incentive that is misaligned with the logistics constraint;
+a scenario-adaptive weight schedule is a natural fix, left for future work.  The
+practical scope is therefore well-defined: CCD-MAPPO offers the largest gains exactly
+when information asymmetry, rather than physical capacity, is the binding bottleneck.
 
 \paragraph{On the gap between Oracle DQN and CTDE methods.}
 The $42{,}815$-unit gap between the oracle DQN and CCD-MAPPO reflects two confounded
