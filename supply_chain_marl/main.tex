@@ -79,13 +79,13 @@
 
 %%─── Highlights ────────────────────────────────────────────────────────────
 \noindent\textbf{Highlights}
-\begin{itemize}[leftmargin=2em,itemsep=1pt]
+\begin{enumerate}[label=\arabic*.,leftmargin=2em,itemsep=1pt]
   \item CCD index embedded in MARL state space formalizes data-capability breadth--depth trade-off
   \item Residual policy construction guarantees worst-case performance bounded by the $(s,S)$ heuristic
   \item Linear-scaling GNN critic reduces parameter complexity from $O(|\mathcal{N}|^2)$ to $O(|\mathcal{E}|)$
   \item 12.4\% improvement over QMIX across four disruption scenarios, confirmed by Wilcoxon tests
   \item Controlled ablation isolates the balance dimension's marginal contribution beyond raw score aggregates
-\end{itemize}
+\end{enumerate}
 \bigskip
 
 %% ── abstract ──────────────────────────────────────────────────────────────
@@ -359,7 +359,8 @@ controlled ablation.
 \subsection{Multi-Agent MDP Formulation}
 \label{sec:formulation}
 
-We model the supply chain as a partially observable M-MDP
+We model the supply chain as a partially observable M-MDP following the Markov game
+framework of \citet{lowe2017multi}:
 \begin{equation}
 \M = \bigl\langle \N,\,\cS,\,\{A_i\}_{i\in\N},\,\mathcal{P},\,\{R_i\}_{i\in\N},\,
                   \{\Omega_i\}_{i\in\N},\,\gamma \bigr\rangle,
@@ -585,17 +586,19 @@ R_{i,t} =
   + \lambda_S\!\underbrace{\CCD_{i,t}}_{\text{coupling bonus}},
 \label{eq:reward}
 \end{equation}
-where $\lambda_R,\lambda_C,\lambda_S>0$ are reward weights (Table~\ref{tab:hyper}).  The
-$\CCD$ bonus creates an intrinsic incentive for agents to maintain balanced data-utilization
-capability; the intrinsic incentive encodes the empirical finding that structural
-capability balance drives resilience more than aggregate capability level alone.
+where $\lambda_R,\lambda_C,\lambda_S>0$ are reward weights (Table~\ref{tab:hyper}).
+The multi-component reward structure follows supply chain RL design principles established
+in \citet{oroojlooyjadid2022deep}.  The $\CCD$ bonus creates an intrinsic incentive for
+agents to maintain balanced data-utilization capability; the intrinsic incentive encodes
+the empirical finding that structural capability balance drives resilience more than
+aggregate capability level alone.
 
 \subsection{MAPPO with Residual-Policy Construction}
 \label{sec:mappo}
 
-We employ MAPPO with a centralized critic $V_\phi(s_t)$ trained on the joint state and
-decentralized actors $\{\pi_{\theta_i}\}$ trained on partial observations
-(Figure~\ref{fig:architecture}).  To ensure safe initial deployment, the executed action
+We employ MAPPO \citep{yu2022surprising} with a centralized critic $V_\phi(s_t)$ trained
+on the joint state and decentralized actors $\{\pi_{\theta_i}\}$ trained on partial
+observations (Figure~\ref{fig:architecture}).  To ensure safe initial deployment, the executed action
 is the \emph{residual policy}
 \begin{equation}
 a_{i,t} = \operatorname{clip}\!\bigl(
@@ -767,8 +770,9 @@ degradation, while the MLP critic fails entirely when $|\N|$ changes.
 \subsection{Simulation Environment}
 \label{sec:env}
 
-We construct a discrete-time, three-tier simulator with $N=9$ agents.  Demand follows a
-Gaussian distribution $d_t\sim\mathcal{N}(\mu_d,\sigma_d^2)$ centered at the per-step
+We construct a discrete-time, three-tier simulator with $N=9$ agents, building on the
+multi-echelon supply chain environment of \citet{oroojlooyjadid2022deep}.  Demand follows
+a Gaussian distribution $d_t\sim\mathcal{N}(\mu_d,\sigma_d^2)$ centered at the per-step
 base demand, with disruption events overriding the baseline according to the scenario
 parameters.  Lead times follow a deterministic two-step delay subject to a multiplier
 $\kappa_t\ge1$ under transportation-delay scenarios.  Breadth $B_{i,t}$ and depth
@@ -805,19 +809,16 @@ Residual scale $\rho_{\mathrm{res}}$ & 0.20 & & \\
 \end{tabular}
 \end{table}
 
-Following \citet{hosseini2019review}, four scenarios span the disruption space:
-\begin{itemize}[itemsep=2pt]
-  \item \textbf{S1 (Demand Surge)}: mean demand increases by $+150\%$ for 30 steps from
-    $t=50$.
-  \item \textbf{S2 (Supply Interruption)}: one randomly chosen supplier goes offline for
-    40 steps from $t=60$.
-  \item \textbf{S3 (Transportation Delay)}: lead-time multiplier $\kappa=2$ for all
-    tiers for 50 steps from $t=80$.
-  \item \textbf{S4 (Compound Shock)}: simultaneous combination of S1, S2, and S3.
-    Note that S4 is an in-distribution combination: all three constituent shocks appear
-    individually during mixed-scenario training, so S4 tests response to their
-    simultaneous onset rather than zero-shot generalization to a novel regime.
-\end{itemize}
+Following \citet{hosseini2019review}, four scenarios span the disruption space.
+\textbf{S1 (Demand Surge)}: mean demand increases by $+150\%$ for 30 steps from $t=50$.
+\textbf{S2 (Supply Interruption)}: one randomly chosen supplier goes offline for 40 steps
+from $t=60$.
+\textbf{S3 (Transportation Delay)}: lead-time multiplier $\kappa=2$ for all tiers for
+50 steps from $t=80$.
+\textbf{S4 (Compound Shock)}: simultaneous combination of S1, S2, and S3.  S4 is an
+in-distribution combination: all three constituent shocks appear individually during
+mixed-scenario training, so S4 tests response to their simultaneous onset rather than
+zero-shot generalization to a novel regime.
 
 For each method and scenario we report (i) mean operating return $\bar\Pi$, (ii)
 cumulative resilience loss $\mathcal{L}=\int(1-F(t))\,dt$, (iii) mean service rate
@@ -858,23 +859,20 @@ as a controlled measurement of the value of information sharing.
 \label{sec:main}
 
 Table~\ref{tab:aggregate} reports aggregate performance across all four disruption
-scenarios.  Within the CTDE-admissible class (all methods except B6), CCD-MAPPO is the
-best performer on every metric.  Notably:
-\begin{itemize}[itemsep=2pt]
-  \item CCD-MAPPO improves mean return by \textbf{4.1\%} over MAPPO w/o CCD
-    ($p=0.031$, Wilcoxon), \textbf{12.4\%} over QMIX ($p=0.012$), \textbf{21.2\%}
-    over MADDPG ($p=0.008$), \textbf{31.2\%} over IPPO ($p<0.001$), and
-    \textbf{23.7\%} over the $(s,S)$ heuristic.\footnote{All relative improvements are
-    computed as $(|\bar\Pi_{\text{baseline}}| - |\bar\Pi_{\text{CCD-MAPPO}}|)\;/\;
-    |\bar\Pi_{\text{baseline}}|\times100\%$, reflecting the proportional reduction in
-    the absolute loss magnitude relative to each baseline.}
-  \item The lower standard deviation of CCD-MAPPO ($\pm312.4$ vs.\ $\pm389.7$ for
-    MAPPO w/o CCD) indicates more consistent performance across seeds and episodes.
-  \item Time-to-recover $T_R$ is reduced from 17.5 steps (MAPPO w/o CCD) to 15.2 steps,
-    a 13.1\% improvement that is operationally significant in time-critical scenarios.
-  \item The gap between the oracle DQN and CCD-MAPPO is $35{,}080.6-(-7{,}734.6)
-    =42{,}815.2$ return units.  We discuss this gap in Section~\ref{sec:discussion}.
-\end{itemize}
+scenarios.  Within the CTDE-admissible class (all methods except the oracle DQN),
+CCD-MAPPO is the best performer on every metric.  CCD-MAPPO improves mean return by
+\textbf{4.1\%} over MAPPO w/o CCD ($p=0.031$, Wilcoxon), \textbf{12.4\%} over QMIX
+($p=0.012$), \textbf{21.2\%} over MADDPG ($p=0.008$), \textbf{31.2\%} over IPPO
+($p<0.001$), and \textbf{23.7\%} over the $(s,S)$ heuristic.\footnote{All relative
+improvements are computed as $(|\bar\Pi_{\text{baseline}}| -
+|\bar\Pi_{\text{CCD-MAPPO}}|)\;/\;|\bar\Pi_{\text{baseline}}|\times100\%$, reflecting
+the proportional reduction in the absolute loss magnitude relative to each baseline.}
+The lower standard deviation of CCD-MAPPO ($\pm312.4$ vs.\ $\pm389.7$ for MAPPO w/o
+CCD) indicates more consistent performance across seeds and episodes.  Time-to-recover
+$T_R$ is reduced from 17.5 steps (MAPPO w/o CCD) to 15.2 steps, a 13.1\% improvement
+that is operationally significant in time-critical scenarios.  The gap between the oracle
+DQN and CCD-MAPPO is $35{,}080.6-(-7{,}734.6)=42{,}815.2$ return units; we discuss this
+gap in Section~\ref{sec:discussion}.
 
 \begin{table}[t]
 \centering
@@ -927,7 +925,7 @@ this cooperative setting.
   xmin=0, xmax=200,
   ymin=-45000, ymax=40000,
   grid=major, grid style={dashed,gray!40},
-  legend style={at={(0.5,-0.18)},anchor=north,legend columns=3,
+  legend style={at={(0.5,-0.35)},anchor=north,legend columns=3,
     font=\small,fill=white,draw=gray!60},
   title={Learning Curves: Mixed-Scenario Training (5 seeds)},
   every axis plot/.append style={thick}]
@@ -1270,7 +1268,7 @@ as the dominant performance driver.
   xtick={0.25,0.5,1,2,4},
   xticklabels={$\times0.25$,$\times0.5$,$\times1$,$\times2$,$\times4$},
   grid=major, grid style={dashed,gray!40},
-  legend style={at={(0.5,-0.18)},anchor=north,legend columns=2,font=\small},
+  legend style={at={(0.5,-0.35)},anchor=north,legend columns=2,font=\small},
   xmode=log, log basis x=2,
   title={Sensitivity to Reward Weight Scaling}]
 
