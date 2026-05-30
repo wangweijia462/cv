@@ -160,9 +160,10 @@ augmented by a data-element Coupling Coordination Degree signal.  Our contributi
 \begin{enumerate}[label=\textbf{C\arabic*.},leftmargin=*]
 \item \textbf{Representational efficiency of CCD.}  Under an empirically verified
   condition on the supply chain environment (Condition A2, confirmed by ablation in
-  Section~\ref{sec:ablation}), we prove that CCD is the unique scalar feature in a
-  natural function class that captures the non-additive interaction between data breadth
-  and depth, which no linear combination $\alpha B+\beta D$ can recover (Proposition~1).
+  Section~\ref{sec:ablation}), we show that CCD is the canonical scalar in its
+  function class for capturing the non-additive interaction between data breadth
+  and depth that no symmetric linear combination $\alpha B+\beta D$ can recover
+  (Proposition~1).
   This provides a principled feature-engineering justification beyond ad hoc construction.
 
 \item \textbf{Safe residual policy with provable baseline guarantee.}  We prove that the
@@ -519,7 +520,7 @@ Under the residual policy~\eqref{eq:residual}:
     deviate from the heuristic by at most $\rho_{\mathrm{res}}$ action units.
   \item \textbf{Expressiveness under constraint}: Despite the $\rho_{\mathrm{res}}$-bounded
     search space, the converged CCD-MAPPO policy achieves a $23.7\%$ return improvement
-    over the $(s,S)$ heuristic (Table~\ref{tab:main}), demonstrating that the constrained
+    over the $(s,S)$ heuristic (Table~\ref{tab:aggregate}), demonstrating that the constrained
     residual parameterization is expressive enough to capture meaningful policy improvements
     while satisfying the deviation bound in~(ii) at every training step.
 \end{enumerate}
@@ -531,7 +532,7 @@ $\E[\tilde{a}_{i,t}]=0.5$ and negligible variance, giving
 $\rho_{\mathrm{res}}(2\cdot0.5-1)=0$.  (ii) Deviation: for any $\tilde{a}\in[0,1]$,
 $(2\tilde{a}-1)\in[-1,1]$, so the additive deviation $\rho_{\mathrm{res}}(2\tilde{a}-1)$
 has magnitude at most $\rho_{\mathrm{res}}$; the outer clip preserves feasibility.
-(iii) Observed in Table~\ref{tab:main}: the mean return gap between CCD-MAPPO
+(iii) Observed in Table~\ref{tab:aggregate}: the mean return gap between CCD-MAPPO
 ($-7734.6$) and the $(s,S)$ heuristic ($-10142.4$) confirms that the learned residual
 $\tilde{a}$ exploits the $\rho_{\mathrm{res}}$ budget productively.  The deviation bound
 in (ii) ensures this exploration never violates the safety margin, so (ii) and (iii)
@@ -1341,8 +1342,8 @@ The author thanks the anonymous reviewers for constructive comments.
 The author declares no competing financial or non-financial interests.
 
 \section*{Data and Code Availability}
-Simulation code, training scripts, and aggregated results are publicly available at
-\url{https://github.com/wangweijia462/cv/tree/main/supply_chain_marl}.
+Simulation code, training scripts, and aggregated experimental results are available
+from the corresponding author upon reasonable request.
 
 %%═══════════════════════════════════════════════════════════════════════════
 \bibliographystyle{abbrvnat}
