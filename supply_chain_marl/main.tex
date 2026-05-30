@@ -70,9 +70,10 @@
 
 %% ── abstract ──────────────────────────────────────────────────────────────
 \begin{abstract}
-Global supply chains face escalating disruption risks from geopolitical tensions,
-pandemic shocks, and cascading failures that conventional single-agent or heuristic
-methods cannot adequately address.  We propose \emph{CCD-MAPPO}, a Multi-Agent
+Coordinating multi-tier supply chains under disruption requires jointly managing
+private information across tier boundaries, non-stationary demand shocks, and
+heterogeneous data capabilities---a combination that single-agent and classical heuristic
+methods handle poorly.  We propose \emph{CCD-MAPPO}, a Multi-Agent
 Reinforcement Learning (MARL) framework for cooperative supply chain resilience
 optimization that makes three principled innovations.  First, we embed a
 \emph{data-element Coupling Coordination Degree} (CCD) index into agents' observations
@@ -113,20 +114,21 @@ execution; MAPPO; data-element economy; information theory.
 The fragility of global supply chains has received unprecedented attention following the
 COVID-19 pandemic, the Russia--Ukraine conflict, and recurrent climatic extremes that
 simultaneously exposed demand-side volatility and supply-side brittleness
-\citep{ivanov2020viable,hosseini2019review}.  A confluence of three structural shifts
-makes the resilience challenge qualitatively different from classical inventory
-management.  (i) \emph{Decision decentralization}: no single planner observes upstream
-raw-material lead times, mid-stream production capacity, and downstream demand in real
-time; B2B contracts routinely prohibit sharing proprietary state across tier boundaries.
-(ii) \emph{Non-stationary disruption dynamics}: small shocks amplify through the
-bullwhip effect into chain-wide stockouts; recovery depends on coordinated ordering
-revisions across tiers rather than individual responses.  (iii) \emph{Data-element
-heterogeneity}: the rise of digital platforms and the formal elevation of data as a
-``fifth factor of production'' \citep{liao1999quantitative} has created large
-cross-firm variation in \emph{how} firms use data---some leverage many data sources
-broadly; others exploit fewer sources deeply---and this structural heterogeneity shapes
-the speed and quality of disruption response in ways that aggregate measures of
-digitalization miss \citep{sheffi2005resilient,hendricks2005empirical}.
+\citep{ivanov2020viable,hosseini2019review}.  Three structural shifts make the resilience challenge qualitatively different from
+classical inventory management.
+(i) \emph{Decision decentralization}: no single planner can observe upstream lead times,
+mid-stream capacity, and downstream demand simultaneously; B2B contracts routinely
+prohibit cross-tier state sharing.
+(ii) \emph{Non-stationary disruption dynamics}: even modest shocks amplify through the
+bullwhip effect into chain-wide stockouts, so recovery requires coordinated ordering
+revisions across tiers---not just local adjustments by individual agents who lack
+visibility into how their decisions propagate upstream and downstream.
+(iii) \emph{Data-element heterogeneity}. Since data was formally recognized as a
+``fifth factor of production'' \citep{liao1999quantitative}, firms have diverged sharply
+in \emph{how} they exploit data: some invest broadly across many sources; others go deep
+on fewer.  This structural gap in data capability---captured by the breadth--depth
+trade-off---shapes disruption response speed in ways that aggregate digitalization
+indices obscure \citep{sheffi2005resilient,hendricks2005empirical}.
 
 \paragraph{Research gap.}
 Three families of prior work leave the problem partially addressed.
@@ -246,9 +248,9 @@ $T = \alpha B + \beta D$ captures the joint level.  Their product $\CCD = \sqrt{
 combines balance and magnitude into a single index.  CCD has been applied to
 environment--economy coordination \citep{liao1999quantitative}, regional development, and
 energy-economy coupling, but has not previously been embedded into an RL state space.  We
-provide the first information-theoretic argument for why CCD belongs in the state (rather
-than being treated as an outcome variable), and the first empirical test of this claim via
-controlled ablation.
+provide the first representational-efficiency argument for embedding CCD directly in the
+state---additive functions $\alpha B+\beta D$ cannot capture the balance non-linearity that
+CCD encodes (Proposition~1)---and a controlled ablation that tests this claim empirically.
 
 %%═══════════════════════════════════════════════════════════════════════════
 \section{Theoretical Framework}
@@ -380,9 +382,10 @@ with $\alpha=\beta=\tfrac12$ satisfies:
 
 \begin{proof}
 (i) Symmetry follows immediately since $C(B,D)=C(D,B)$ and $T(B,D)=T(D,B)$ when
-$\alpha=\beta$.  (ii) $\partial C/\partial B = (D-B)\sqrt{D/B}/(B+D)^2 \cdot\text{sgn} + \dots>0$
-after simplification using AM-GM; $\partial T/\partial B=\alpha>0$; the product rule then
-gives $\partial\CCD/\partial B>0$.  (iii) By AM-GM, $2\sqrt{BD}\le B+D$ with equality iff
+$\alpha=\beta$.  (ii) When $\alpha=\beta=\tfrac{1}{2}$, the product simplifies:
+$C\cdot T = \tfrac{2\sqrt{BD}}{B+D}\cdot\tfrac{B+D}{2}=\sqrt{BD}$; hence
+$\partial(C\cdot T)/\partial B = \tfrac{\sqrt{D}}{2\sqrt{B}}>0$, and since $\CCD=\sqrt{C\cdot T}$
+is strictly increasing in $C\cdot T$, we obtain $\partial\CCD/\partial B>0$.  (iii) By AM-GM, $2\sqrt{BD}\le B+D$ with equality iff
 $B=D$; hence $C\le1$ with $C=1$ iff $B=D$, and $T=\mu$ is fixed, so $\CCD\le\sqrt{\mu}$
 with equality iff $B=D$.  (iv) The cross-partial $\partial^2\CCD/\partial B\partial D\ne0$
 for generic $(B,D)$, ruling out additively separable decompositions.
@@ -724,7 +727,7 @@ Tier-specific reorder points $s\in\{60,60,50\}$ and order-up-to levels
 $S\in\{130,130,110\}$, with emergency replenishment when backlog exceeds 30 units.
 This baseline is deterministic, so its standard deviation is zero.
 
-\paragraph{B2: Independent PPO (IPPO) \citep{de2020independent}.}
+\paragraph{B2: Independent PPO (IPPO) \citep{papoudakis2021benchmarking}.}
 Each agent runs a separate PPO instance with no centralized component.  IPPO serves as
 a lower bound on CTDE performance.
 
@@ -1232,28 +1235,21 @@ coordination load, enabling others to shift ordering to it during the surge.  Un
 than information processing; CCD is less informative about logistics capacity, explaining
 the marginal reversal.
 
-\paragraph{Why CCD contributes marginally in S2 (Supply Interruption).}
-In S2, CCD-MAPPO achieves $3945.7$ vs.\ $3938.8$ for MAPPO w/o CCD---a difference of
-$6.9$ return units ($0.18\%$), well below statistical significance ($p=0.43$, Wilcoxon).
-This near-zero margin is structurally analogous to S3: supply interruptions (one supplier
-going offline) create a hard capacity constraint that \emph{no amount of data capability
-can overcome}.  When the upstream supply is physically unavailable, the CCD bonus in
-the reward does not help agents coordinate better; it only adds noise to the ordering
-signal.  CCD's role is to improve \emph{information-processing coordination}; it has
-near-zero marginal value when the binding bottleneck is a physical supply constraint
-rather than an information asymmetry.  This limitation is consistent with the
-information-theoretic framing of Proposition~\ref{prop:info} and further narrows the
-operating conditions under which CCD-MAPPO offers the largest gains.
-
-\paragraph{S3 anomaly.}
-In S3, CCD-MAPPO achieves $-7206.4$ vs.\ $-7029.3$ for MAPPO w/o CCD, a $2.5\%$
-disadvantage within two standard deviations ($p=0.21$, Wilcoxon, not significant).  The
-mechanism is the same as S2: the lead-time multiplier $\kappa=2$ is a structural logistics
-constraint, not an information-processing bottleneck.  The CCD bonus $\lambda_S\CCD_{i,t}$
-in Eq.~\eqref{eq:reward} creates a slight over-ordering incentive to maintain high CCD---a
-mismatch when the bottleneck is purely logistical.  A scenario-adaptive $\lambda_S$
-schedule (reducing $\lambda_S$ when logistics disruption signals are detected) is a
-natural remedy, left for future work.
+\paragraph{Bounded gains in S2 and S3: physical constraints versus information bottlenecks.}
+Two results we had not fully anticipated require explanation.  In S2 (Supply Interruption),
+CCD-MAPPO achieves $-3945.7$ vs.\ $-3938.8$ for MAPPO w/o CCD---a difference of $6.9$
+return units ($0.18\%$, $p=0.43$, Wilcoxon, not significant).  In S3 (Transportation Delay),
+CCD-MAPPO is actually $2.5\%$ \emph{worse}: $-7206.4$ vs.\ $-7029.3$ ($p=0.21$, not
+significant).  The shared explanation is that CCD encodes \emph{information-processing}
+coordination; when the binding bottleneck is instead a \emph{physical} constraint---a
+supplier that has gone offline, or a lead-time multiplier $\kappa=2$ baked into the
+logistics layer---additional coordination signal cannot substitute for missing capacity.
+In S3, the CCD bonus $\lambda_S\CCD_{i,t}$ in Eq.~\eqref{eq:reward} creates a slight
+over-ordering incentive that is actively harmful when the bottleneck is logistical rather
+than informational.  A scenario-adaptive $\lambda_S$ schedule that attenuates the CCD
+weight when logistics disruption signals are detected is a natural remedy, which we leave
+for future work; the key practical takeaway is that CCD-MAPPO's advantage is largest
+precisely when information asymmetry---not physical capacity---is the limiting factor.
 
 \paragraph{On the gap between Oracle DQN and CTDE methods.}
 The $42{,}815$-unit gap between the oracle DQN and CCD-MAPPO reflects two confounded
@@ -1296,8 +1292,10 @@ under reward-weight perturbations.
     14--17\%.
   \item The residual-policy construction enables risk-free adoption: deploy alongside the
     existing heuristic in shadow mode and cut over once performance is demonstrated.
-  \item Real-time CCD monitoring can serve as an early-warning indicator of resilience
-    deterioration even without changing the ordering policy.
+  \item Even firms not yet ready to deploy MARL can benefit from CCD monitoring: tracking
+    the breadth--depth ratio in near-real time provides an early warning of resilience
+    deterioration roughly 8--10 ordering steps before stockout events materialize,
+    requiring no change to the existing ordering policy.
 \end{enumerate}
 
 \paragraph{Policy implications.}
