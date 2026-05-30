@@ -73,37 +73,32 @@
 Coordinating multi-tier supply chains under disruption requires jointly managing
 private information across tier boundaries, non-stationary demand shocks, and
 heterogeneous data capabilities---a combination that single-agent and classical heuristic
-methods handle poorly.  We propose \emph{CCD-MAPPO}, a Multi-Agent Reinforcement Learning (MARL) framework
-for cooperative supply chain resilience with three principled innovations.
-First, a \emph{data-element Coupling Coordination Degree} (CCD) index is embedded into
-agents' observations and team reward; no symmetric linear feature $\alpha B+\beta D$
-can distinguish the balance dimension CCD encodes when the optimal policy depends
-non-additively on breadth--depth balance (Condition A2, empirically verified via
-ablation), and CCD is the canonical balance-plus-level scalar in the
-coupling-coordination family (Proposition~1).
-Second, we introduce a \emph{residual-policy construction} anchored on an $(s,S)$
-inventory heuristic under Centralized Training, Decentralized Execution (CTDE); this
-bounds worst-case performance at the classical baseline and preserves B2B information
-privacy at execution time (Proposition~2).
-Third, we derive a \emph{linear-scaling GNN critic} that reduces parameter complexity
-from $O(|\mathcal{N}|^2)$ to $O(|\mathcal{E}|)$ for industrial-size networks
-(Proposition~3).  We evaluate CCD-MAPPO against five baselines---the
-$(s,S)$ heuristic, Independent PPO (IPPO), MADDPG, QMIX, and a centralized oracle
-DQN---across four disruption scenarios with five random seeds.  CCD-MAPPO achieves the
-best mean return of $-7734.6\pm312.4$ within the CTDE-admissible class (4.1\% over
-vanilla MAPPO, 8.3\% over QMIX, and 23.7\% over the heuristic), confirmed significant
-at $p<0.05$ by Wilcoxon rank-sum tests.  Extended ablation confirms CCD is
-non-redundant with its components, and reward-weight sensitivity analysis shows the
-comparative ordering is stable under a two-octave parameter sweep.
+methods handle poorly.  We propose CCD-MAPPO, a multi-agent reinforcement learning
+framework for cooperative supply chain resilience built on three principled innovations.
+First, a data-element Coupling Coordination Degree index is embedded into agents'
+observations and team reward.  No symmetric linear feature $\alpha B+\beta D$ can
+distinguish the balance dimension this index encodes when the optimal policy depends
+non-additively on breadth--depth balance; ablation confirms this empirically and
+Proposition~1 formalizes it.
+Second, a residual-policy construction anchored on an $(s,S)$ inventory heuristic
+under centralized training and decentralized execution bounds worst-case performance
+at the classical baseline and preserves B2B information privacy at execution time, with
+a formal safety guarantee proved in Proposition~2.
+Third, a linear-scaling graph neural network critic reduces parameter complexity from
+$O(|\mathcal{N}|^2)$ to $O(|\mathcal{E}|)$ for industrial-size networks, as established
+in Proposition~3.
+Against five baselines over four disruption scenarios with five random seeds,
+CCD-MAPPO achieves a mean return of $-7734.6\pm312.4$---the best within the
+decentralized-execution class, improving 4.1\% over vanilla MAPPO, 8.3\% over QMIX,
+and 23.7\% over the heuristic, all confirmed at $p<0.05$ by Wilcoxon rank-sum tests.
+Ablation confirms CCD is non-redundant with its components, and reward-weight
+sensitivity is stable across a two-octave parameter sweep.
 
 \medskip\noindent
 \textbf{Keywords:} Multi-agent reinforcement learning; supply chain resilience;
 coupling coordination degree; residual policy; centralized training decentralized
 execution; MAPPO; data-element economy; information theory.
 \end{abstract}
-
-\tableofcontents
-\newpage
 
 %%═══════════════════════════════════════════════════════════════════════════
 \section{Introduction}
@@ -128,7 +123,6 @@ on fewer.  This structural gap in data capability---captured by the breadth--dep
 trade-off---shapes disruption response speed in ways that aggregate digitalization
 indices obscure \citep{sheffi2005resilient,hendricks2005empirical}.
 
-\paragraph{Research gap.}
 Three lines of prior work each address part of the problem while leaving another part
 open.  Econometric methods (panel data, difference-in-differences) can identify
 \emph{whether} digitalization improves resilience, but they treat firm decisions as a
@@ -152,7 +146,6 @@ breadth and depth---a key result from coupling-coordination theory
 despite its empirical importance in explaining cross-firm heterogeneity in disruption
 recovery.
 
-\paragraph{Our approach and contributions.}
 We formulate cooperative supply chain resilience as a partially observable Multi-Agent
 Markov Decision Process (M-MDP) and propose \textbf{CCD-MAPPO}: a MAPPO algorithm
 augmented by a data-element Coupling Coordination Degree signal.  Our contributions are:
@@ -207,7 +200,6 @@ choice of bullwhip penalty in the reward function.
 
 \subsection{Multi-Agent Reinforcement Learning}
 
-\paragraph{Cooperative MARL algorithms.}
 \citet{lowe2017multi} introduce MADDPG, which extends DDPG to mixed cooperative-competitive
 settings via centralized critics conditioned on joint actions.
 \citet{rashid2018qmix} propose QMIX, a value-decomposition method that factorizes the joint
@@ -219,7 +211,6 @@ it remains a competitive baseline in cooperative tasks despite its simplicity.
 joint state, achieves state-of-the-art performance with greater sample efficiency than
 MADDPG in cooperative tasks.  We use all four as baselines (Section~\ref{sec:baselines}).
 
-\paragraph{MARL in supply-chain contexts.}
 \citet{oroojlooyjadid2022deep} apply a deep Q-network to the Beer Distribution Game,
 establishing the first DRL benchmark for multi-tier inventory management.
 \citet{zhang2020multi} demonstrate cooperative scheduling gains through MARL in
@@ -229,7 +220,6 @@ congestion-prone environments analogous to supply bottlenecks.  Our work extends
 by incorporating structural data-capability indices into the state and reward, a dimension
 none of the above studies addresses.
 
-\paragraph{Information-augmented and safe MARL.}
 Recent work has investigated feature engineering for MARL state spaces
 \citep{velic2018graph,hamilton2017inductive} and safe policy learning via constrained
 optimization \citep{schulman2017proximal}.  Our residual-policy construction is related to
@@ -350,7 +340,6 @@ $o_{i,t} = s_t \odot \mathbf{m}_i$, where $\mathbf{m}_i\in\{0,1\}^{\dim(s)}$ is 
 tier-specific visibility mask encoding the information asymmetry inherent in B2B
 relationships.
 
-\paragraph{CCD computation.}
 For each agent $i$ at time $t$:
 \begin{equation}
 \CCD_{i,t} = \sqrt{C_{i,t}\cdot T_{i,t}},\quad
@@ -704,9 +693,7 @@ Residual scale $\rho_{\mathrm{res}}$ & 0.20 & & \\
 \end{tabular}
 \end{table}
 
-\paragraph{Disruption scenarios.}
-Following the typology of \citet{hosseini2019review}, we design four scenarios that span
-the disruption space:
+Following \citet{hosseini2019review}, four scenarios span the disruption space:
 \begin{itemize}[itemsep=2pt]
   \item \textbf{S1 (Demand Surge)}: mean demand increases by $+150\%$ for 30 steps from
     $t=50$.
@@ -720,7 +707,6 @@ the disruption space:
     simultaneous onset rather than zero-shot generalization to a novel regime.
 \end{itemize}
 
-\paragraph{Evaluation metrics.}
 For each method and scenario we report (i) mean operating return $\bar\Pi$, (ii)
 cumulative resilience loss $\mathcal{L}=\int(1-F(t))\,dt$, (iii) mean service rate
 $\bar F$, (iv) order-quantity volatility (Vol., bullwhip proxy), and (v) time-to-recover
@@ -731,36 +717,30 @@ episodes}=100$ rollouts per cell.
 \subsection{Baselines}
 \label{sec:baselines}
 
-\paragraph{B1: $(s,S)$ heuristic.}
-Tier-specific reorder points $s\in\{60,60,50\}$ and order-up-to levels
-$S\in\{130,130,110\}$, with emergency replenishment when backlog exceeds 30 units.
-This baseline is deterministic, so its standard deviation is zero.
+The $(s,S)$ heuristic uses tier-specific reorder points $s\in\{60,60,50\}$ and
+order-up-to levels $S\in\{130,130,110\}$, with emergency replenishment when backlog
+exceeds 30 units; it is deterministic, so its standard deviation is zero.
 
-\paragraph{B2: Independent PPO (IPPO) \citep{papoudakis2021benchmarking}.}
-Each agent runs a separate PPO instance with no centralized component.  IPPO serves as
-a lower bound on CTDE performance.
+Independent PPO \citep{papoudakis2021benchmarking} runs a separate PPO instance per
+agent with no centralized component, serving as a lower bound on decentralized
+performance.
 
-\paragraph{B3: MADDPG \citep{lowe2017multi}.}
-Off-policy, actor-critic with centralized critics conditioned on joint observations and
-actions.  We use continuous actions to match our setting.
+MADDPG \citep{lowe2017multi} is an off-policy actor-critic method with centralized
+critics conditioned on joint observations and actions; we use continuous actions to
+match our setting.
 
-\paragraph{B4: QMIX \citep{rashid2018qmix}.}
-Value decomposition with a monotone mixing network.  We discretize the action space to
-five bins per dimension per agent to enable $Q$-value factorization.
+QMIX \citep{rashid2018qmix} uses value decomposition with a monotone mixing network;
+we discretize the action space to five bins per dimension per agent to enable
+$Q$-value factorization.
 
-\paragraph{B5: MAPPO without CCD.}
-Identical to our method but with the CCD slot in Eq.~\eqref{eq:state} masked to zero,
-isolating the marginal contribution of the coupling-coordination signal.
+MAPPO without CCD is identical to our method but with the CCD slot in
+Eq.~\eqref{eq:state} masked to zero, isolating the marginal contribution of the
+coupling-coordination signal.
 
-\paragraph{B6: Centralized DQN (oracle).}
-A single-agent factored DQN observing the full joint state.  We treat B6 as an
-\emph{oracle upper bound} that violates the CTDE constraint, since real B2B supply chains
-cannot expose proprietary tier-state to a central planner.  Note that the gap between B6
-and CTDE methods conflates two factors: the information advantage of joint observability
-and the algorithmic difference between DQN and MAPPO.  We report B6 solely as an
-aspirational ceiling, not as a controlled measurement of the value of information.
-Quantifying only the information value would require a centralized MAPPO (or equivalent
-on-policy variant), which we leave for future work.
+A centralized oracle DQN observes the full joint state.  This oracle violates the
+decentralized-execution constraint---real B2B supply chains cannot expose proprietary
+tier-state to a central planner---so we treat it as an aspirational upper bound, not
+as a controlled measurement of the value of information sharing.
 
 \subsection{Main Results}
 \label{sec:main}
@@ -1257,7 +1237,6 @@ a scenario-adaptive weight schedule is a natural fix, left for future work.  The
 practical scope is therefore well-defined: CCD-MAPPO offers the largest gains exactly
 when information asymmetry, rather than physical capacity, is the binding bottleneck.
 
-\paragraph{On the gap between Oracle DQN and CTDE methods.}
 The $42{,}815$-unit gap between the oracle DQN and CCD-MAPPO reflects two confounded
 factors: (i) \emph{information structure}: DQN observes the full joint state, eliminating
 B2B information asymmetry; (ii) \emph{algorithmic difference}: DQN uses a different
@@ -1270,7 +1249,6 @@ information barriers is at most this gap.  From a policy design standpoint, even
 information sharing (e.g., via privacy-preserving data-exchange platforms) could
 unlock a meaningful fraction of this bound.
 
-\paragraph{Practical deployment considerations.}
 The residual-policy construction ensures that deploying CCD-MAPPO early in training
 incurs no additional risk relative to the incumbent $(s,S)$ policy.  Firms can therefore
 adopt a \emph{shadow-mode} deployment: run CCD-MAPPO alongside the existing heuristic,
@@ -1294,7 +1272,7 @@ approach scales to networks three times the training size with under 18\% perfor
 degradation---a result that matters for industrial deployment even if theoretical
 scalability guarantees remain an open problem.
 
-\paragraph{Managerial implications.}
+Three practical recommendations follow from these results.
 \begin{enumerate}[label=(\arabic*),itemsep=2pt]
   \item Firms should target a \emph{joint} breadth--depth trajectory rather than either
     dimension alone; our ablation shows that unbalanced capability degrades resilience by
@@ -1307,7 +1285,6 @@ scalability guarantees remain an open problem.
     requiring no change to the existing ordering policy.
 \end{enumerate}
 
-\paragraph{Policy implications.}
 Public investment in data-exchange platforms, identity standards, and trusted execution
 environments lowers the institutional cost of CTDE-style cooperation.  As discussed in
 Section~\ref{sec:discussion}, the $42{,}815$-unit gap between the oracle DQN and
@@ -1318,7 +1295,6 @@ differentiation by firm maturity stage is warranted: subsidies should target the
 \emph{lagging} breadth or depth dimension first, since CCD's marginal value is highest
 where the breadth--depth gap is largest.
 
-\paragraph{Limitations and future work.}
 The simulator abstracts from cross-border tariff and exchange-rate dynamics.
 Importantly, the breadth $B_{i,t}$ and depth $D^{\mathrm{pth}}_{i,t}$ indices are
 \emph{synthetically generated} via Ornstein--Uhlenbeck dynamics around firm-specific
