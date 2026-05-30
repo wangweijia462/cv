@@ -73,23 +73,21 @@
 Coordinating multi-tier supply chains under disruption requires jointly managing
 private information across tier boundaries, non-stationary demand shocks, and
 heterogeneous data capabilities---a combination that single-agent and classical heuristic
-methods handle poorly.  We propose \emph{CCD-MAPPO}, a Multi-Agent
-Reinforcement Learning (MARL) framework for cooperative supply chain resilience
-optimization that makes three principled innovations.  First, we embed a
-\emph{data-element Coupling Coordination Degree} (CCD) index into agents' observations
-and team reward.  We formally characterize CCD's representational efficiency: when the
-optimal policy depends non-additively on the balance between breadth and depth
-(Condition A2, empirically verified via ablation), no additive linear combination
-$\alpha B+\beta D$ can capture the balance dimension that CCD encodes, and CCD provides
-the canonical scalar in the coupling-coordination family that combines balance and level
-(Proposition~1).  Second, we introduce a
-\emph{residual-policy construction} anchored on an $(s,S)$ inventory heuristic under the
-Centralized Training, Decentralized Execution (CTDE) paradigm; this guarantees that the
-worst-case learned policy is bounded by the classical baseline and preserves B2B
-information privacy at execution time (Proposition~2).  Third, we derive a
-\emph{linear-scaling GNN critic} that replaces the fully connected value head for
-industrial-size networks, reducing parameter complexity from $O(|\mathcal{N}|^2)$ to
-$O(|\mathcal{E}|)$ (Proposition~3).  We evaluate CCD-MAPPO against five baselines---the
+methods handle poorly.  We propose \emph{CCD-MAPPO}, a Multi-Agent Reinforcement Learning (MARL) framework
+for cooperative supply chain resilience with three principled innovations.
+First, a \emph{data-element Coupling Coordination Degree} (CCD) index is embedded into
+agents' observations and team reward; no symmetric linear feature $\alpha B+\beta D$
+can distinguish the balance dimension CCD encodes when the optimal policy depends
+non-additively on breadth--depth balance (Condition A2, empirically verified via
+ablation), and CCD is the canonical balance-plus-level scalar in the
+coupling-coordination family (Proposition~1).
+Second, we introduce a \emph{residual-policy construction} anchored on an $(s,S)$
+inventory heuristic under Centralized Training, Decentralized Execution (CTDE); this
+bounds worst-case performance at the classical baseline and preserves B2B information
+privacy at execution time (Proposition~2).
+Third, we derive a \emph{linear-scaling GNN critic} that reduces parameter complexity
+from $O(|\mathcal{N}|^2)$ to $O(|\mathcal{E}|)$ for industrial-size networks
+(Proposition~3).  We evaluate CCD-MAPPO against five baselines---the
 $(s,S)$ heuristic, Independent PPO (IPPO), MADDPG, QMIX, and a centralized oracle
 DQN---across four disruption scenarios with five random seeds.  CCD-MAPPO achieves the
 best mean return of $-7734.6\pm312.4$ within the CTDE-admissible class (4.1\% over
@@ -131,17 +129,18 @@ trade-off---shapes disruption response speed in ways that aggregate digitalizati
 indices obscure \citep{sheffi2005resilient,hendricks2005empirical}.
 
 \paragraph{Research gap.}
-Three families of prior work leave the problem partially addressed.
-\emph{Econometric} approaches (panel data, difference-in-differences) cleanly identify
-whether digitalization improves resilience but treat firm decisions as a reduced-form
-residual; they cannot prescribe \emph{how} firms should adjust ordering, pricing, or
-emergency replenishment decisions in real time.
-\emph{Operations-research heuristics}---the $(s,S)$ rule, base-stock policies,
-rolling-horizon LP---are prescriptive but assume stationarity and a single rational
-planner, both increasingly unrealistic for multi-tier networks under disruption.
-\emph{Single-agent DRL} handles non-stationarity within one decision-maker's
-environment yet ignores strategic interdependence and violates the realistic constraint
-that firms cannot expose proprietary state to peers or to a central planner.
+Three lines of prior work each address part of the problem while leaving another part
+open.  Econometric methods (panel data, difference-in-differences) can identify
+\emph{whether} digitalization improves resilience, but they treat firm decisions as a
+reduced-form residual and cannot prescribe real-time ordering adjustments.
+Operations-research heuristics---the $(s,S)$ rule, rolling-horizon LP---are prescriptive
+but assume stationarity and a single rational planner, which is increasingly unrealistic
+for multi-tier networks where no single actor controls the full supply chain.  Single-agent
+DRL handles non-stationarity, yet it ignores strategic interdependence and cannot respect
+the B2B constraint that proprietary state must not be shared across tier boundaries.
+What is missing is a framework that simultaneously handles partial observability,
+multi-tier strategic interaction, and structural heterogeneity in data capability---which
+is what this paper attempts.
 
 Recent progress in multi-agent RL \citep{lowe2017multi,yu2022surprising,rashid2018qmix}
 provides a natural language for this problem, but two gaps persist.  First, prior MARL
@@ -203,9 +202,9 @@ from \emph{recovery}, and \citet{hosseini2019review} survey quantitative indicat
 the loss area $\int(1-F(t))\,dt$, the time-to-recover $T_R$, and the minimum service level
 $F_{\min}$, which we adopt as evaluation metrics.  \citet{ivanov2020viable} introduces the
 Viable Supply Chain model that accounts for survivability under long-duration shocks,
-motivating our compound-shock scenario.  \citet{dolgui2021ripple} study the ripple effect
-by which local disruptions cascade into systemic failures, directly motivating the bullwhip
-penalty in our reward function.
+motivating our compound-shock scenario.  \citet{dolgui2021ripple} study ripple cascades
+in supply networks; their analysis of how local failures spread chain-wide informs our
+choice of bullwhip penalty in the reward function.
 
 \subsection{Multi-Agent Reinforcement Learning}
 
@@ -416,8 +415,10 @@ $(B,D)$ denote the raw breadth--depth pair.  Assume:
 \end{enumerate}
 Then:
 \begin{enumerate}[label=(\roman*),itemsep=2pt]
-  \item No additive function $h(B,D)=f(B)+g(D)$ can distinguish the two pairs in (A2),
-    so any purely additive feature is representationally insufficient for $\pi^*$.
+  \item No \emph{symmetric linear} additive function $h(B,D)=\alpha(B+D)$ can distinguish
+    the two pairs in (A2); asymmetric or nonlinear additive features may distinguish them
+    in principle but must learn the balance non-linearity implicitly, incurring higher
+    sample complexity than encoding CCD directly.
   \item Among all functions satisfying the properties in Lemma~\ref{lem:ccd} (symmetry,
     monotonicity, balance-sensitivity, non-linearity), $\CCD$ is the \emph{canonical
     member} of the coupling-coordination construction $\sqrt{C(B,D)\cdot T(B,D)}$ that
@@ -438,12 +439,12 @@ Then:
 \end{proposition}
 
 \begin{proof}
-(i) If $h(B,D)=f(B)+g(D)$ and $B_1+D_1=B_2+D_2$, then $h$ cannot distinguish
-the two pairs unless $f$ and $g$ jointly encode the balance; for a \emph{symmetric}
-additive decomposition ($f=g$) this is impossible by construction, since $f(B_1)+f(D_1)
-=f(B_2)+f(D_2)$ whenever $B_1+D_1=B_2+D_2$ and $f$ is linear.  For nonlinear $f$,
-the distinction is possible in principle but requires learning it implicitly from data,
-incurring higher sample complexity.
+(i) For a symmetric linear function $h(B,D)=\alpha(B+D)$, the two pairs in (A2)
+satisfy $B_1+D_1=B_2+D_2$, so $h$ assigns identical values: $\alpha(B_1+D_1)=\alpha(B_2+D_2)$.
+Hence $h$ is representationally insufficient for $\pi^*$.  Asymmetric or nonlinear
+additive features may distinguish the pairs, but require the agent to recover the
+balance non-linearity from data, incurring higher sample complexity---which is precisely
+what explicit CCD pre-computation avoids.
 
 (ii) We do not claim uniqueness over the entire class $\mathcal{F}$; many functions in
 $\mathcal{F}$ are non-additive and balance-sensitive.  The claim is that CCD is
@@ -984,7 +985,7 @@ CCD-MAPPO not only achieves the lowest \emph{median} $T_R$ (15 steps) within the
 class, but also compresses the \emph{upper quartile} and the whisker---the tail that
 matters most in practice, since prolonged recoveries trigger cascading backorders and
 reputational penalties.  Compared with MAPPO w/o CCD, CCD-MAPPO reduces the
-interquartile range from $[16,\,19]$ to $[14,\,16]$, representing a 37\% narrower
+interquartile range from $[16,\,19]$ to $[14,\,16]$, representing a 33\% narrower
 recovery-time spread.
 
 \begin{figure}[t]
@@ -1276,14 +1277,17 @@ Proposition~\ref{prop:safety}.
 \section{Conclusion and Policy Implications}
 \label{sec:conclusion}
 
-This paper has formulated cooperative supply chain resilience optimization as a
-partially observable M-MDP and proposed CCD-MAPPO: a MAPPO algorithm augmented by a
-Coupling Coordination Degree signal, equipped with a residual-policy safety construction,
-and extended to scalable GNN critics.  Three formal propositions ground the methodological
-choices in information theory and complexity theory.  Empirically, CCD-MAPPO is the best
-CTDE-admissible method across four disruption scenarios, with statistically significant
-improvements over five baselines, compressed time-to-recover tails, and stable performance
-under reward-weight perturbations.
+The central insight of this work is that digital capability is not a scalar: its
+structural composition---breadth vs.\ depth---matters for how firms coordinate under
+disruption, and this structure can be encoded into an RL state space without sacrificing
+decentralizability or B2B privacy.  CCD-MAPPO demonstrates that this seemingly simple
+augmentation yields consistent, statistically verified gains across a range of disruption
+regimes (4.1\% over vanilla MAPPO; 12.4\% over QMIX), and the residual-policy
+construction makes adoption tractable even for risk-averse practitioners who cannot
+afford to discard existing operational heuristics.  The GNN critic extension shows the
+approach scales to networks three times the training size with under 18\% performance
+degradation---a result that matters for industrial deployment even if theoretical
+scalability guarantees remain an open problem.
 
 \paragraph{Managerial implications.}
 \begin{enumerate}[label=(\arabic*),itemsep=2pt]
