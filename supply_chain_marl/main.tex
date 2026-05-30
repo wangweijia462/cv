@@ -517,12 +517,11 @@ Under the residual policy~\eqref{eq:residual}:
   \item \textbf{Bounded deviation}: For all $t$ and all $\tilde{a}_{i,t}\in[0,1]$,
     $|a_{i,t}-a^{\mathrm{ss}}_{i,t}|\le\rho_{\mathrm{res}}$, so the learned policy can
     deviate from the heuristic by at most $\rho_{\mathrm{res}}$ action units.
-  \item \textbf{Worst-case bound}: For any partially trained policy with arbitrary
-    $\tilde{a}_{i,t}\in[0,1]$, the executed action satisfies
-    $a_{i,t}\in[a^{\mathrm{ss}}_{i,t}-\rho_{\mathrm{res}},\;
-    a^{\mathrm{ss}}_{i,t}+\rho_{\mathrm{res}}]\cap[0,1]$,
-    bounding the deviation from the heuristic at \emph{every} training stage, not
-    only at initialization.
+  \item \textbf{Expressiveness under constraint}: Despite the $\rho_{\mathrm{res}}$-bounded
+    search space, the converged CCD-MAPPO policy achieves a $23.7\%$ return improvement
+    over the $(s,S)$ heuristic (Table~\ref{tab:main}), demonstrating that the constrained
+    residual parameterization is expressive enough to capture meaningful policy improvements
+    while satisfying the deviation bound in~(ii) at every training step.
 \end{enumerate}
 \end{proposition}
 
@@ -532,11 +531,11 @@ $\E[\tilde{a}_{i,t}]=0.5$ and negligible variance, giving
 $\rho_{\mathrm{res}}(2\cdot0.5-1)=0$.  (ii) Deviation: for any $\tilde{a}\in[0,1]$,
 $(2\tilde{a}-1)\in[-1,1]$, so the additive deviation $\rho_{\mathrm{res}}(2\tilde{a}-1)$
 has magnitude at most $\rho_{\mathrm{res}}$; the outer clip preserves feasibility.
-(iii) Follows from (ii): for any $\tilde{a}\in[0,1]$, $(2\tilde{a}-1)\in[-1,1]$, so the
-additive deviation $\rho_{\mathrm{res}}(2\tilde{a}-1)$ has magnitude at most
-$\rho_{\mathrm{res}}$ regardless of $k$; the outer clip further enforces $[0,1]$
-feasibility.  At $k=0$ the bound reduces to zero (Proposition~(i)), and it remains
-$\rho_{\mathrm{res}}$ throughout training.
+(iii) Observed in Table~\ref{tab:main}: the mean return gap between CCD-MAPPO
+($-7734.6$) and the $(s,S)$ heuristic ($-10142.4$) confirms that the learned residual
+$\tilde{a}$ exploits the $\rho_{\mathrm{res}}$ budget productively.  The deviation bound
+in (ii) ensures this exploration never violates the safety margin, so (ii) and (iii)
+are complementary: (ii) bounds the downside; (iii) verifies the upside is accessible.
 \end{proof}
 
 \begin{figure}[t]
