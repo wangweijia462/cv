@@ -32,7 +32,7 @@
 \renewcommand{\headrulewidth}{0.4pt}
 \usepackage{caption}
 \usepackage{subcaption}
-\usepackage[numbers,sort&compress]{natbib}
+\usepackage[authoryear,round]{natbib}
 
 %% ── theorem environments ──────────────────────────────────────────────────
 \theoremstyle{plain}
@@ -68,7 +68,8 @@
 \author{Weijia Wang\\
   \small School of Economics and Finance, Xi'an Jiaotong University\\
   \small Xi'an, Shaanxi 710049, P.\,R.\,China\\
-  \small \texttt{18522704823@163.com}}
+  \small \texttt{18522704823@163.com}\\
+  \small ORCID: 0000-0000-0000-0000}
 
 \date{}
 
@@ -77,16 +78,6 @@
 \linenumbers
 \maketitle
 
-%%─── Highlights ────────────────────────────────────────────────────────────
-\noindent\textbf{Highlights}
-\begin{enumerate}[label=\arabic*.,leftmargin=2em,itemsep=1pt]
-  \item CCD index embedded in MARL state space formalizes data-capability breadth--depth trade-off
-  \item Residual policy construction guarantees worst-case performance bounded by the $(s,S)$ heuristic
-  \item Linear-scaling GNN critic reduces parameter complexity from $O(|\mathcal{N}|^2)$ to $O(|\mathcal{E}|)$
-  \item 12.4\% improvement over QMIX across four disruption scenarios, confirmed by Wilcoxon tests
-  \item Controlled ablation isolates the balance dimension's marginal contribution beyond raw score aggregates
-\end{enumerate}
-\bigskip
 
 %% ── abstract ──────────────────────────────────────────────────────────────
 \begin{abstract}
@@ -117,7 +108,7 @@ sensitivity is stable across a two-octave parameter sweep.
 \medskip\noindent
 \textbf{Keywords:} Multi-agent reinforcement learning; supply chain resilience;
 coupling coordination degree; residual policy; centralized training decentralized
-execution; MAPPO; data-element economy; information theory.
+execution; graph neural network.
 \end{abstract}
 
 %%═══════════════════════════════════════════════════════════════════════════
@@ -1425,15 +1416,23 @@ also a direct follow-up.
 \section*{Acknowledgments}
 The author thanks the anonymous reviewers for constructive comments.
 
-\section*{Conflict of Interest}
+\section*{Statements and Declarations}
+
+\textbf{Competing Interests.}
 The author declares no competing financial or non-financial interests.
 
-\section*{Data and Code Availability}
+\textbf{Data and Code Availability.}
 Simulation code, training scripts, and aggregated experimental results are available
 from the corresponding author upon reasonable request.
 
+\textbf{AI Assistance.}
+Large language model tools were used during manuscript preparation to assist with
+language editing, \LaTeX{} formatting, and iterative revision of mathematical
+exposition.  All scientific content, experimental design, results, and conclusions are
+the sole responsibility of the author.
+
 %%═══════════════════════════════════════════════════════════════════════════
-\bibliographystyle{abbrvnat}
+\bibliographystyle{apalike}
 \bibliography{references}
 
 \end{document}
