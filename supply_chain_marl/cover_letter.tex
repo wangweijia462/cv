@@ -1,0 +1,87 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{microtype}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.8em}
+
+\begin{document}
+
+\today
+
+\bigskip
+
+\textbf{Editor-in-Chief}\\
+\textit{Annals of Operations Research}\\
+Springer Nature
+
+\bigskip\bigskip
+
+Dear Editor-in-Chief,
+
+We submit for your consideration the manuscript:
+
+\begin{center}
+\textbf{CCD-MAPPO: A Coupling Coordination Degree Signal\\
+for Cooperative Multi-Agent Supply Chain Resilience}
+\end{center}
+
+\textbf{Motivation and scope.}
+Global supply chains face an underappreciated structural challenge: firms differ not only
+in \emph{how much} data they exploit, but in whether they invest broadly across many
+data sources (breadth) or deeply in a few (depth).  This breadth--depth heterogeneity,
+captured by the Coupling Coordination Degree (CCD) from coupling-coordination theory,
+shapes disruption recovery speed in ways that aggregate digitalization indices obscure.
+No prior multi-agent reinforcement learning (MARL) framework embeds this structural
+dimension into the state space or reward signal.  Our paper closes that gap.
+
+\textbf{Contributions.}
+We propose CCD-MAPPO, a MAPPO algorithm augmented by the CCD signal, with three
+principled theoretical contributions:
+\begin{enumerate}
+  \item \textbf{Representational efficiency} (Proposition~1): no symmetric linear
+    feature $\alpha B + \beta D$ can distinguish the balance non-linearity that CCD
+    encodes; CCD's canonical C/T factorization is analytically irreducible.
+  \item \textbf{Provable safety} (Proposition~2): a residual-policy construction
+    anchored on the $(s,S)$ heuristic guarantees worst-case performance at the
+    classical baseline and preserves B2B information privacy at execution time.
+  \item \textbf{Linear scaling} (Proposition~3): a graph neural network critic with
+    $O(|\mathcal{E}|)$ parameter complexity---vs.\ $O(|\mathcal{N}|^2)$ for MLP
+    critics---enables deployment on industrial-scale supply networks.
+\end{enumerate}
+Against five baselines over four disruption scenarios (100 rollouts each), CCD-MAPPO
+achieves a 4.1\% improvement over vanilla MAPPO, 12.4\% over QMIX, and 23.7\% over
+the $(s,S)$ heuristic, all confirmed at $p<0.05$ by Wilcoxon rank-sum tests.
+
+\textbf{Fit with \textit{Annals of Operations Research}.}
+The paper combines stochastic dynamic optimisation, supply chain management, and
+MARL---an intersection central to AOR's interdisciplinary scope.  The safety guarantee
+and closed-form scaling result provide the analytical rigour expected of the journal,
+while the four-scenario experiment grounds the contributions in operations practice.
+
+\textbf{Declarations.}
+This manuscript is original, has not been previously published, and is not currently
+under review at any other journal.  The author declares no competing interests.
+Large language model tools were used solely for language editing and \LaTeX{}
+formatting; all scientific content and conclusions are the sole responsibility of the
+author.
+
+We are confident this work makes a meaningful contribution to the literature on
+data-driven supply chain resilience and respectfully ask that it be considered for
+publication in \textit{Annals of Operations Research}.
+
+\bigskip
+
+Yours sincerely,
+
+\bigskip\bigskip
+
+\textbf{Weijia Wang}\\
+Doctoral Candidate\\
+School of Economics and Finance\\
+Xi'an Jiaotong University\\
+Xi'an, Shaanxi 710049, P.\,R.\,China\\
+Email: \texttt{18522704823@163.com}\\
+ORCID: 0000-0000-0000-0000
+
+\end{document}

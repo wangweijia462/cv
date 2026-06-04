@@ -30,6 +30,25 @@
 \lhead{\small Weijia Wang}
 \cfoot{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
+
+%% ── first-page style: ORCID + author biography in footer ───────────────────
+\fancypagestyle{firstpage}{%
+  \fancyhf{}
+  \rhead{\small CCD-MAPPO: Supply Chain Resilience via Coupling Coordination}
+  \lhead{\small Weijia Wang}
+  \cfoot{\thepage}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+  \lfoot{\parbox[t]{\textwidth}{\footnotesize\setstretch{1.2}%
+    \textbf{ORCID:}~0000-0000-0000-0000\quad|\quad
+    \textbf{Author biography.}
+    Weijia Wang is a doctoral candidate in the School of Economics and Finance at
+    Xi'an Jiaotong University, Xi'an, China.  His research interests span
+    multi-agent reinforcement learning, supply chain resilience, and data-driven
+    operations management, with a particular focus on how digitalization heterogeneity
+    shapes disruption recovery dynamics in multi-tier supply networks.
+  }}
+}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage[authoryear,round]{natbib}
@@ -77,6 +96,7 @@
 \begin{document}
 \linenumbers
 \maketitle
+\thispagestyle{firstpage}
 
 
 %% ── abstract ──────────────────────────────────────────────────────────────
